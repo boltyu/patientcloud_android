@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="patientlist_title_size">30sp</dimen>
+    <dimen name="patientlist_text_size">30sp</dimen>
+    <dimen name="patientinfo_line_height">30dp</dimen>
+    <dimen name="patientinfo_text_size">15sp</dimen>
+</resources>

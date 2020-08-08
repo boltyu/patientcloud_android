@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">PatientCloud</string>
+    <string name="login_username_hint">输入用户名</string>
+    <string name="login_password_hint">输入密码</string>
+    <string name="button_login">登录</string>
+    <string name="button_new_patient">添加</string>
+    <string name="label_patient_name">姓名</string>
+    <string name="label_patient_birthday">生日</string>
+    <string name="label_patient_phone">电话</string>
+
+    <string-array name="option_gender">
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+</resources>
