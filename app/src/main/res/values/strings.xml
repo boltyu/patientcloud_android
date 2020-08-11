@@ -8,8 +8,4 @@
     <string name="label_patient_birthday">生日</string>
     <string name="label_patient_phone">电话</string>
 
-    <string-array name="option_gender">
-        <item>男</item>
-        <item>女</item>
-    </string-array>
 </resources>

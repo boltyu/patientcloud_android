@@ -5,19 +5,31 @@ import android.provider.ContactsContract;
 import android.util.JsonReader;
 
 import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.Buffer;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class UrlConnection{
 
     private String sessionid;
-    private String hostaddress = "192.168.1.75";
+    private String hostaddress = "192.168.1.132";
     private String hostport = "8000";
     private String urlHost = "";
     private String urlLogin = "", urlLogout = "";
@@ -141,10 +153,12 @@ public class UrlConnection{
         return new JSONObject();
     }
 
+
+
     public Boolean uploadImg(String idnum, String category, String fullfilepath){
         try{
             URL targetUrl = new URL(urlPatient+idnum+"/"+category+"/");
-
+            //hash = MessageDigest.getInstance("MD5").digest();
             String pathToOurFile = Environment.getExternalStorageDirectory() + "/tmp.jpg";
             String lineEnd = "\r\n";
             String twoHyphens = "--";
@@ -202,9 +216,6 @@ public class UrlConnection{
             e.printStackTrace();
         }
 
-
-
-
         return false;
     }
 
@@ -246,4 +257,70 @@ public class UrlConnection{
         return false;
     }
 
+    public List<String[]> getPicList(String idnum,String category) {
+        List<String[]> piclist = new ArrayList<>();
+        try {
+            URL targetUrl = new URL(urlPatient + idnum + "/" + category + "/");
+            HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
+            privateconnection.setRequestMethod("GET");
+            privateconnection.setConnectTimeout(5000);
+            privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+            privateconnection.setRequestProperty("Cookie",sessionid);
+            int rcode = privateconnection.getResponseCode();
+            if(rcode == 200) {
+                InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
+                char[] sdf = new char[65536];
+                inLogin.read(sdf);
+                JSONObject re = new JSONObject(String.valueOf(sdf));
+                privateconnection.disconnect();
+                if(re.optInt("result") == 200) {
+                    JSONObject listdata = re.optJSONObject("data");
+                    Iterator<String> it_listdata = listdata.keys();
+                    int i = 0;
+                    while(it_listdata.hasNext()) {
+                        String filename = it_listdata.next();
+                        String remark = listdata.optString(idnum);
+                        File tmpfile = MainActivity.fileManager.getFile(idnum,category,filename);
+                        if(!tmpfile.exists()){
+                            downloadImg(idnum,category,filename,tmpfile);
+                        }else{
+                        }
+                        piclist.add(new String[]{
+                                tmpfile.getAbsolutePath(),remark
+                        });
+                    }
+                }
+            }
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return piclist;
+    }
+
+
+    public Boolean downloadImg(String idnum, String category, String filename, File targetfile){
+        try {
+            URL targetUrl = new URL(urlPatient + idnum + "/" + category + "/" + filename);
+            HttpURLConnection privateconnection = (HttpURLConnection) targetUrl.openConnection();
+            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setDoInput(true);
+            privateconnection.connect();
+            OutputStream outputStream = new FileOutputStream(targetfile);
+            InputStream inputStream = privateconnection.getInputStream();
+            byte [] buffer = new byte[1024];
+            int len = 0, total = 0;
+            while( ( len = inputStream.read(buffer)) != -1){
+                outputStream.write(buffer,0,len);
+                total += len;
+            }
+            outputStream.close();
+            privateconnection.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

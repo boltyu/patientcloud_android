@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +28,9 @@ import android.widget.TimePicker;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.Inflater;
 
@@ -34,6 +38,7 @@ import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
 public class PatientInfoAdapter extends PagerAdapter {
 
+    private PatientPicAdapter picAdapter;
     private LinearLayout viewBase, viewSurgery;
     private RecyclerView viewSurgerypic, viewEvalpic, viewEpospic;
     private String[] pageTitle = {"基本信息", "手术信息", "手术照片", "评估照片", "电极照片"};
@@ -49,6 +54,8 @@ public class PatientInfoAdapter extends PagerAdapter {
     private Spinner spinnerGender;
 
     public ImageView viewAvatar;
+
+    private Context pcontext = null;
     
     public PatientInfoAdapter(final Context context) {
         viewBase = (LinearLayout) View.inflate(context,R.layout.patient_info_baseinfo,null);
@@ -81,7 +88,9 @@ public class PatientInfoAdapter extends PagerAdapter {
         mViewList.add(4,viewEpospic);
 
         viewAvatar = viewBase.findViewById(R.id.img_patient_avatar);
+        int  aaa  = viewBase.getWidth();
 
+        pcontext = context;
     }
 
     @Override
@@ -112,10 +121,16 @@ public class PatientInfoAdapter extends PagerAdapter {
     }
 
 
+    public List<String[]> getImageList(final String idnum){
+        List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,"pic");
+        return filelist;
+    }
+
     public boolean postTextInfo(final String idnum){
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 String postdata = "name=" + editPatient_name.getText() +
                         "&gender=" + spinnerGender.getSelectedItemPosition() +
                         "&birthday=" + editPatient_birthday.getText() +
@@ -149,7 +164,6 @@ public class PatientInfoAdapter extends PagerAdapter {
     }
 
     public boolean getTextInfo(final String idnum){
-
         //Toast.makeText(PatientInfoActivity.this,idnum, Toast.LENGTH_LONG).show();
         if(idnum==null || idnum.equals("None") || idnum.equals("")){   // new
 
@@ -157,23 +171,40 @@ public class PatientInfoAdapter extends PagerAdapter {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    JSONObject patientObj = MainActivity.globalConnection.getPatientInfo(idnum);
-                    editPatient_name.setText(patientObj.optString("name"));
-                    editPatient_birthday.setText(patientObj.optString("birthday"));
-                    spinnerGender.setSelection(patientObj.optInt("gender"));
-                    Log.d("gender",String.valueOf(patientObj.optInt("gender")));
-                    editPatient_remark.setText(patientObj.optString("remark"));
-                    editPatient_devicetype.setText(patientObj.optString("devicetype"));
-                    editPatient_surgerytype.setText(patientObj.optString("surgerytype"));
-                    String datetime = patientObj.optString("surgerytime");
-                    editPatient_surgerydate.updateDate(Integer.valueOf(datetime.substring(0,4)),
-                            Integer.valueOf(datetime.substring(4,6)),
-                            Integer.valueOf(datetime.substring(6,8)));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        editPatient_surgerytime.setHour(Integer.valueOf(datetime.substring(9,11)));
-                        editPatient_surgerytime.setMinute(Integer.valueOf(datetime.substring(12,14)));
-                    }
-                    editPatient_surgerypos.setText(patientObj.optString("surgerycenter"));
+
+
+                    final List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,"avatar");
+                    final JSONObject patientObj = MainActivity.globalConnection.getPatientInfo(idnum);
+                    picAdapter = new PatientPicAdapter(getImageList(idnum));
+                    final String datetime = patientObj.optString("surgerytime");
+                    viewAvatar.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(filelist.size() > 0)
+                                viewAvatar.setImageURI(Uri.fromFile(new File(filelist.get(0)[0])));
+                            editPatient_name.setText(patientObj.optString("name"));
+                            editPatient_birthday.setText(patientObj.optString("birthday"));
+                            spinnerGender.setSelection(patientObj.optInt("gender"));
+                            editPatient_remark.setText(patientObj.optString("remark"));
+                            editPatient_devicetype.setText(patientObj.optString("devicetype"));
+                            editPatient_surgerytype.setText(patientObj.optString("surgerytype"));
+                            editPatient_surgerydate.updateDate(Integer.valueOf(datetime.substring(0,4)),
+                                    Integer.valueOf(datetime.substring(4,6)),
+                                    Integer.valueOf(datetime.substring(6,8)));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                editPatient_surgerytime.setHour(Integer.valueOf(datetime.substring(9,11)));
+                                editPatient_surgerytime.setMinute(Integer.valueOf(datetime.substring(12,14)));
+                            }
+                            editPatient_surgerypos.setText(patientObj.optString("surgerycenter"));
+
+
+                            LinearLayoutManager layoutManager = new LinearLayoutManager(pcontext);
+                            viewSurgerypic.setLayoutManager(layoutManager);
+                            viewSurgerypic.setItemAnimator( new DefaultItemAnimator());
+                            viewSurgerypic.setAdapter(picAdapter);
+                        }
+                    });
+
                 }
             }).start();
         }

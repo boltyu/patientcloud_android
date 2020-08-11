@@ -9,7 +9,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="horizontal">
         <TextView
             android:text="植入设备"
@@ -28,7 +29,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="horizontal"
         >
         <TextView
@@ -48,32 +50,45 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="10"
         android:orientation="horizontal"
+        android:layout_gravity="fill_horizontal"
         >
         <TextView
             android:text="手术时间"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textSize="@dimen/patientinfo_text_size"/>
-
-        <DatePicker
-            android:id="@+id/edit_patient_surgery_date"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="2"
             android:layout_height="wrap_content"
-            android:datePickerMode="calendar"/>
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+            <DatePicker
+                android:id="@+id/edit_patient_surgery_date"
+                android:layout_width="wrap_content"
+                android:layout_weight="2"
+                android:layout_height="0dp"
+                android:datePickerMode="calendar"/>
 
-        <TimePicker
-            android:id="@+id/edit_patient_surgery_time"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:timePickerMode="clock"/>
+            <TimePicker
+                android:id="@+id/edit_patient_surgery_time"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="0dp"
+                android:timePickerMode="spinner"/>
+        </LinearLayout>
+
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="horizontal"
         >
         <TextView

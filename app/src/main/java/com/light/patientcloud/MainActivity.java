@@ -13,10 +13,14 @@ public class MainActivity extends AppCompatActivity {
     private EditText editUsername;
     private EditText editPassword;
     public static UrlConnection globalConnection;
-
+    public static PatientFileManager fileManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        fileManager = new PatientFileManager("patientcloud");
+
+
         setContentView(R.layout.activity_main);
         btnLogin = findViewById(R.id.btn_login);
         editPassword = findViewById(R.id.edit_password);
