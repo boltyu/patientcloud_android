@@ -2,55 +2,41 @@ package com.light.patientcloud;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.recyclerview.selection.ItemDetailsLookup;
-import androidx.recyclerview.selection.OnItemActivatedListener;
-import androidx.recyclerview.selection.SelectionTracker;
-import androidx.recyclerview.selection.StableIdKeyProvider;
-import androidx.recyclerview.selection.StorageStrategy;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PatientList extends Activity {
+public class PatientListActivity extends Activity {
 
     private RecyclerView recyclerView;
     private MyAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private Button btnNewPatient;
-
+    private TextView textWelcome, textLogout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
-        recyclerView = (RecyclerView) findViewById(R.id.patient_list_view);
-        recyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_patient_list);
+        // use a linear layout manage
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator( new DefaultItemAnimator());
         btnNewPatient = findViewById(R.id.btn_new_patient);
-        final Intent patientInfo = new Intent(this,PatientInfo.class);
+        final Intent patientInfo = new Intent(this, PatientInfoActivity.class);
         btnNewPatient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,6 +45,23 @@ public class PatientList extends Activity {
                 finish();
             }
         });
+        textWelcome = findViewById(R.id.text_doctor_welcome);
+        textWelcome.setText(textWelcome.getText());
+
+        textLogout = findViewById(R.id.text_doctor_logout);
+        textLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if( MainActivity.globalConnection.loginUser("n","n",1) == true)
+                            finish();
+                    }
+                }).start();
+            }
+        });
+
 
         // specify an adapter (see also next example)
         final List<String[]> myDataset = new ArrayList<>();
@@ -73,7 +76,7 @@ public class PatientList extends Activity {
                     JSONObject patient = patients.optJSONObject(idnum);
                     myDataset.add(i,new String[]{ idnum,
                             patient.optString("name"),
-                            patient.optString("gender"),
+                            patient.optString("phone"),
                             patient.optString("birthday")});
                     i++;
                 }
@@ -89,11 +92,10 @@ public class PatientList extends Activity {
                 mAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        LinearLayout patientView = (LinearLayout) recyclerView.getChildAt(position);
+                        CardView patientView = (CardView) recyclerView.getChildAt(position);
                         TextView idnumView = (TextView)patientView.findViewById(R.id.idnum_view);
                         patientInfo.putExtra("idnum",idnumView.getText());
                         startActivity(patientInfo);
-                        finish();
                     }
                 });
             }
@@ -115,8 +117,8 @@ public class PatientList extends Activity {
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
             // each data item is just a string in this case
-            public LinearLayout linePatient;
-            public MyViewHolder(LinearLayout v) {
+            public CardView linePatient;
+            public MyViewHolder(CardView v) {
                 super(v);
                 linePatient = v;
             }
@@ -132,8 +134,8 @@ public class PatientList extends Activity {
         public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                          int viewType) {
             // create a new view
-            LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.idnum_line_view, parent, false);
+            CardView v = (CardView) LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.patient_list_lineview, parent, false);
             MyViewHolder vh = new MyViewHolder(v);
             return vh;
         }
@@ -157,10 +159,10 @@ public class PatientList extends Activity {
             idnum_view.setText(someString[0]);
             TextView name_view = holder.linePatient.findViewById(R.id.name_view);
             name_view.setText(someString[1]);
-            TextView gender_view = holder.linePatient.findViewById(R.id.gender_view);
+            TextView gender_view = holder.linePatient.findViewById(R.id.text_gender);
             gender_view.setText(someString[2]);
-            TextView age_view = holder.linePatient.findViewById(R.id.age_view);
-            age_view.setText(someString[3]+"岁");
+            TextView birthday_view = holder.linePatient.findViewById(R.id.text_birthday);
+            birthday_view.setText(someString[3]);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {

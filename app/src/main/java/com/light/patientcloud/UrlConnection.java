@@ -17,16 +17,17 @@ import java.net.URL;
 public class UrlConnection{
 
     private String sessionid;
-    private String hostaddress = "192.168.1.132";
+    private String hostaddress = "192.168.1.75";
     private String hostport = "8000";
     private String urlHost = "";
-    private String urlLogin = "";
+    private String urlLogin = "", urlLogout = "";
     private String urlPatient = "";
     private String urlPatient_pic_suffix = "/pic/";
     private String urlPatient_epos_suffix = "/epos/";
     UrlConnection(){
         urlHost = "http://" + hostaddress + ":" + hostport + "/";
         urlLogin = urlHost + "doctor/login/";
+        urlLogout = urlHost + "doctor/logout/";
         urlPatient = urlHost + "patient/";
     }
 
@@ -166,13 +167,11 @@ public class UrlConnection{
 
             connection.setRequestProperty("Cookie",sessionid);
             connection.setRequestProperty("Connection", "Keep-Alive");
-            connection.setRequestProperty("Content-Type",
-                    "multipart/form-data;boundary=" + boundary);
+            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
 
             DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
             outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-            outputStream
-                    .writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\""
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\""
                             + pathToOurFile + "\"" + lineEnd);
             outputStream.writeBytes(lineEnd);
 
@@ -209,9 +208,12 @@ public class UrlConnection{
         return false;
     }
 
-    public Boolean loginUser(String username, String password){
+    public Boolean loginUser(String username, String password, int iflogout){
         try{
-            URL targetUrl = new URL(urlLogin);
+            String urlTarget = urlLogin;
+            if(iflogout == 1)
+                urlTarget = urlLogout;
+            URL targetUrl = new URL(urlTarget);
             HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
             privateconnection.setRequestMethod("POST");
             privateconnection.setConnectTimeout(5000);
@@ -223,6 +225,8 @@ public class UrlConnection{
             outLogin.write(logindata.getBytes());
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
+                if(iflogout == 1)
+                    return true;
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
                 char[] sdf = new char[128];
                 inLogin.read(sdf);

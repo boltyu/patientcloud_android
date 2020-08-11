@@ -3,21 +3,9 @@ package com.light.patientcloud;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.JsonReader;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import com.light.patientcloud.UrlConnection;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,8 +24,8 @@ public class MainActivity extends AppCompatActivity {
         editUsername.setText("test");
         editPassword.setText("qwe123");
         globalConnection = new UrlConnection();
-        final Intent patientIndex = new Intent(this,PatientList.class);
-        //final Intent patientInfo = new Intent(this,PatientInfo.class);
+        final Intent patientIndex = new Intent(this, PatientListActivity.class);
+        //final Intent patientInfo = new Intent(this,PatientInfoActivity.class);
         //startActivity(patientInfo);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,13 +35,14 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         String username = editUsername.getText().toString();
                         String password = editPassword.getText().toString();
-                        final Boolean r = globalConnection.loginUser(username,password);
+                        final Boolean r = globalConnection.loginUser(username,password,0);
                         editPassword.post(new Runnable() {
                             @Override
                             public void run() {
                                 if(r){
                                     editPassword.setBackgroundResource(R.drawable.edit_normal);
                                     startActivity(patientIndex);
+                                    finish();
                                 }
                                 else
                                 {
