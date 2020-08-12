@@ -4,19 +4,18 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -37,62 +36,55 @@ import java.util.List;
 
 public class PatientInfoAdapter extends PagerAdapter {
 
-    private PatientPicAdapter picAdapter;
+    public PatientPicAdapter picAdapter, evalpicAdapter, epospicAdapter;
     private LinearLayout viewBase, viewSurgery;
     public RecyclerView viewSurgerypic, viewEvalpic, viewEpospic;
     private String[] pageTitle = {"基本信息", "手术信息", "手术照片", "评估照片", "电极照片"};
     private List<View> mViewList = new ArrayList<>();
-    private EditText editPatient_surgerytime;
-    private EditText editPatient_name, editPatient_birthday,
+    private EditText editPatient_name,
             editPatient_phone,
             editPatient_remark,
             editPatient_devicetype,
             editPatient_surgerytype,
             editPatient_surgerypos;
+    private TextView editPatient_birthday,editPatient_surgerytime;
     private Spinner spinnerGender;
 
     public ImageView viewAvatar;
-
+    private String currentidnum;
     private Context pcontext = null;
     private Handler mHandler;
-    public PatientInfoAdapter(final Context context, Handler picHandler) {
+    public PatientInfoAdapter(final Context context, String idnum, Handler picHandler) {
         mHandler = picHandler;
         viewBase = (LinearLayout) View.inflate(context,R.layout.patient_info_baseinfo,null);
         viewSurgery = (LinearLayout) View.inflate(context,R.layout.patient_info_surgery,null);
         viewSurgerypic = (RecyclerView) View.inflate(context,R.layout.patient_info_surgerypic,null);
         viewEvalpic = (RecyclerView) View.inflate(context,R.layout.patient_info_evalpic,null);
         viewEpospic = (RecyclerView) View.inflate(context,R.layout.patient_info_epospic,null);
-
+        currentidnum = idnum;
         editPatient_birthday = viewBase.findViewById(R.id.edit_patient_birthday);
         editPatient_name = viewBase.findViewById(R.id.edit_patient_name);
         editPatient_phone = viewBase.findViewById(R.id.edit_patient_phone);
-        editPatient_remark = viewBase.findViewById(R.id.edit_patient_phone);
+        editPatient_remark = viewBase.findViewById(R.id.edit_patient_remark);
         editPatient_devicetype = viewSurgery.findViewById(R.id.edit_patient_device_type);
-        editPatient_surgerytype= viewSurgery.findViewById(R.id.edit_patient_surgery_type);
-        //editPatient_surgerytime = viewSurgery.findViewById(R.id.edit_patient_surgery_time);
+        editPatient_surgerytype = viewSurgery.findViewById(R.id.edit_patient_surgery_type);
         editPatient_surgerytime = viewSurgery.findViewById(R.id.edit_patient_surgery_time);
 
-        editPatient_surgerytime.setClickable(false);
-        editPatient_surgerytime.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+        editPatient_surgerytime.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View view, boolean b) {
-                if( !b || view.getId() != editPatient_surgerytime.getId())
-                    return;
+            public void onClick(View view) {
                 pickDatetime(context, editPatient_surgerytime.getText().toString(), false, new OnDatePicked() {
                     @Override
                     public void setDateText(String text) {
                         editPatient_surgerytime.setText(text);
                     }
                 });
-
             }
         });
-
-        editPatient_birthday.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        editPatient_birthday.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View view, boolean b) {
-                if( !b || view.getId() != editPatient_birthday.getId())
-                    return;
+            public void onClick(View view) {
                 pickDatetime(context, editPatient_birthday.getText().toString(), true, new OnDatePicked() {
                     @Override
                     public void setDateText(String text) {
@@ -103,13 +95,12 @@ public class PatientInfoAdapter extends PagerAdapter {
         });
 
 
-
-
         editPatient_surgerypos = viewSurgery.findViewById(R.id.edit_patient_surgery_center);
 
         List<String> genderlist = new ArrayList<String>();
         genderlist.add(0,"女");
         genderlist.add(1,"男");
+
         spinnerGender = viewBase.findViewById(R.id.select_patient_gender);
         spinnerGender.setAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_spinner_item,genderlist));
 
@@ -154,8 +145,8 @@ public class PatientInfoAdapter extends PagerAdapter {
     }
 
 
-    public List<String[]> getImageList(final String idnum){
-        List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,"pic");
+    public List<String[]> getImageList(String idnum, String category){
+        List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,category);
         return filelist;
     }
 
@@ -167,7 +158,8 @@ public class PatientInfoAdapter extends PagerAdapter {
                 String postdata = "name=" + editPatient_name.getText() +
                         "&gender=" + spinnerGender.getSelectedItemPosition() +
                         "&birthday=" + editPatient_birthday.getText() +
-                        "&remark=" + editPatient_phone.getText() +
+                        "&phone=" + editPatient_phone.getText() +
+                        "&remark=" + editPatient_remark.getText() +
                         "&devicetype=" + editPatient_devicetype.getText() +
                         "&surgerytype=" + editPatient_surgerytype.getText() +
                         "&surgerytime=" + editPatient_surgerytime.getText() +
@@ -188,20 +180,59 @@ public class PatientInfoAdapter extends PagerAdapter {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-
-
                     final List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,"avatar");
                     final JSONObject patientObj = MainActivity.globalConnection.getPatientInfo(idnum);
-                    picAdapter = new PatientPicAdapter(getImageList(idnum));
+                    picAdapter = new PatientPicAdapter(getImageList(idnum,"pic"));
                     picAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
                             if( (position+1) == picAdapter.getItemCount()){
+                                Message message = Message.obtain(mHandler,2);
+                                message.sendToTarget();
+                            }
+                        }
+                    });
+                    picAdapter.setOnItemLongClickListener(new PatientPicAdapter.OnItemLongClickListener() {
+                        @Override
+                        public void onItemLongClick(View view, int position) {
+                            ProcessLongClick(position,"pic",viewSurgerypic);
+                        }
+                    });
+
+                    evalpicAdapter = new PatientPicAdapter(getImageList(idnum,"eval"));
+                    evalpicAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            if( (position+1) == evalpicAdapter.getItemCount()){
                                 Message message = Message.obtain(mHandler,3);
                                 message.sendToTarget();
                             }
                         }
                     });
+                    evalpicAdapter.setOnItemLongClickListener(new PatientPicAdapter.OnItemLongClickListener() {
+                        @Override
+                        public void onItemLongClick(View view, int position) {
+                            ProcessLongClick(position,"eval",viewEvalpic);
+                        }
+                    });
+
+                    epospicAdapter = new PatientPicAdapter(getImageList(idnum,"epos"));
+                    epospicAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            if( (position+1) == epospicAdapter.getItemCount()){
+                                Message message = Message.obtain(mHandler,4);
+                                message.sendToTarget();
+                            }
+                        }
+                    });
+                    epospicAdapter.setOnItemLongClickListener(new PatientPicAdapter.OnItemLongClickListener() {
+                        @Override
+                        public void onItemLongClick(View view, int position) {
+                            ProcessLongClick(position,"epos",viewEpospic);
+                        }
+                    });
+
 
                     final String datetime = patientObj.optString("surgerytime");
                     viewAvatar.post(new Runnable() {
@@ -213,6 +244,7 @@ public class PatientInfoAdapter extends PagerAdapter {
                             editPatient_birthday.setText(patientObj.optString("birthday"));
                             spinnerGender.setSelection(patientObj.optInt("gender"));
                             editPatient_remark.setText(patientObj.optString("remark"));
+                            editPatient_phone.setText(patientObj.optString("phone"));
                             editPatient_devicetype.setText(patientObj.optString("devicetype"));
                             editPatient_surgerytype.setText(patientObj.optString("surgerytype"));
                             editPatient_surgerytime.setText(patientObj.optString("surgerytime"));
@@ -223,6 +255,16 @@ public class PatientInfoAdapter extends PagerAdapter {
                             viewSurgerypic.setLayoutManager(layoutManager);
                             viewSurgerypic.setItemAnimator( new DefaultItemAnimator());
                             viewSurgerypic.setAdapter(picAdapter);
+
+                            LinearLayoutManager layoutManager2 = new LinearLayoutManager(pcontext);
+                            viewEpospic.setLayoutManager(layoutManager2);
+                            viewEpospic.setItemAnimator( new DefaultItemAnimator());
+                            viewEpospic.setAdapter(epospicAdapter);
+
+                            LinearLayoutManager layoutManager3 = new LinearLayoutManager(pcontext);
+                            viewEvalpic.setLayoutManager(layoutManager3);
+                            viewEvalpic.setItemAnimator( new DefaultItemAnimator());
+                            viewEvalpic.setAdapter(evalpicAdapter);
                         }
                     });
 
@@ -230,6 +272,45 @@ public class PatientInfoAdapter extends PagerAdapter {
             }).start();
         }
         return false;
+    }
+
+    public void ProcessLongClick(final int position, final String category,final RecyclerView targetView){
+        final PatientPicAdapter tmpAdapter = (PatientPicAdapter) targetView.getAdapter();
+        final String fullfilepath = tmpAdapter.GetFileintheList(position)[0];
+        final File tmpfile = new File(fullfilepath);
+        final String filename = tmpfile.getName();
+        Log.d("filename", filename);
+        new AlertDialog.Builder(pcontext)
+                .setTitle("确认删除")
+                .setMessage("图片描述: " + tmpAdapter.GetFileintheList(position)[1])
+                .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if( MainActivity.globalConnection.deleteImg(currentidnum,category,filename) ){
+                                    final List<String[]> newDataset = MainActivity.globalConnection.getPicList(currentidnum,category);
+                                    targetView.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            tmpAdapter.UpdatePicList(newDataset);
+                                            tmpAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .show();
     }
 
     public void pickDatetime(final Context context, String olddatetime, final boolean onlydate, final OnDatePicked onDatePicked){

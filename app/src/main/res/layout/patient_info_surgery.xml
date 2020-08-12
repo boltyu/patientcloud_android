@@ -19,6 +19,7 @@
             android:textSize="@dimen/patientinfo_text_size"/>
         <EditText
             android:id="@+id/edit_patient_device_type"
+            android:text="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -37,6 +38,7 @@
             android:labelFor="@id/edit_patient_surgery_type"
             android:textSize="@dimen/patientinfo_text_size"/>
         <EditText
+            android:text="1"
             android:id="@+id/edit_patient_surgery_type"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -56,13 +58,15 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/patientinfo_text_size"/>
 
-        <EditText
+        <TextView
             android:id="@+id/edit_patient_surgery_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:inputType="datetime"/>
-<!--        <LinearLayout-->
+            android:textSize="@dimen/patientinfo_text_size"
+            android:hint="选择日期和时间"
+            android:paddingLeft="10dp" />
+        <!--        <LinearLayout-->
 <!--            android:layout_width="0dp"-->
 <!--            android:layout_weight="2"-->
 <!--            android:layout_height="wrap_content"-->
@@ -98,6 +102,7 @@
             android:labelFor="@id/edit_patient_surgery_center"
             android:textSize="@dimen/patientinfo_text_size"/>
         <EditText
+            android:text="SszCed."
             android:id="@+id/edit_patient_surgery_center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

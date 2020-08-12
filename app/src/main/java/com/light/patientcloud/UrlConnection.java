@@ -29,47 +29,19 @@ import java.util.concurrent.ExecutionException;
 public class UrlConnection{
 
     private String sessionid;
-    private String hostaddress = "192.168.1.75";
+    private String hostaddress = "192.168.1.132";
     private String hostport = "8000";
     private String urlHost = "";
     private String urlLogin = "", urlLogout = "";
     private String urlPatient = "";
     private String urlPatient_pic_suffix = "/pic/";
     private String urlPatient_epos_suffix = "/epos/";
+
     UrlConnection(){
         urlHost = "http://" + hostaddress + ":" + hostport + "/";
         urlLogin = urlHost + "doctor/login/";
         urlLogout = urlHost + "doctor/logout/";
         urlPatient = urlHost + "patient/";
-    }
-
-    public int postPatientInfo(String idnum, JSONObject patientinfo){
-        try{
-            URL targetUrl = new URL(urlPatient+idnum+"/");
-            HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
-            String postdata = "data=" +patientinfo.toString();
-            privateconnection.setRequestMethod("POST");
-            privateconnection.setConnectTimeout(5000);
-            privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
-            privateconnection.setRequestProperty("Content-Length", postdata.length()+"");
-            int rcode = privateconnection.getResponseCode();
-            if(rcode == 200) {
-                InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[4096];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
-                privateconnection.disconnect();
-                if(re.optInt("result") == 200) {
-                    return 0;
-                }else{
-                    return 1;
-                }
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return -1;
     }
 
     public int postPatientInfo(String idnum, String postdata){
@@ -103,6 +75,62 @@ public class UrlConnection{
         return -1;
     }
 
+    public boolean deletePaitent(String idnum){
+        try{
+            URL targetUrl = new URL(urlPatient);
+            HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
+            privateconnection.setRequestMethod("POST");
+            privateconnection.setConnectTimeout(5000);
+            privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+            privateconnection.setRequestProperty("Cookie",sessionid);
+            String postdata = "method=delete&idnum="+idnum;
+            OutputStream outLogin = privateconnection.getOutputStream();
+            outLogin.write(postdata.getBytes());
+            int rcode = privateconnection.getResponseCode();
+            if(rcode == 200) {
+                InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
+                char[] sdf = new char[256];
+                inLogin.read(sdf);
+                JSONObject re = new JSONObject(String.valueOf(sdf));
+                privateconnection.disconnect();
+                if(re.optInt("result") == 200) {
+                    return true;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteImg(String idnum, String category, String filename){
+        try{
+            URL targetUrl = new URL(urlPatient+idnum+"/"+category+"/"+filename);
+            HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
+            privateconnection.setRequestMethod("POST");
+            privateconnection.setConnectTimeout(5000);
+            privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+            privateconnection.setRequestProperty("Cookie",sessionid);
+            String postdata = "method=delete";
+            OutputStream outLogin = privateconnection.getOutputStream();
+            outLogin.write(postdata.getBytes());
+            int rcode = privateconnection.getResponseCode();
+            if(rcode == 200) {
+                InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
+                char[] sdf = new char[256];
+                inLogin.read(sdf);
+                JSONObject re = new JSONObject(String.valueOf(sdf));
+                privateconnection.disconnect();
+                if(re.optInt("result") == 200) {
+                    return true;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public JSONObject getPatientInfo(String idnum){
         try{
             URL targetUrl = new URL(urlPatient+idnum+"/");
@@ -128,7 +156,7 @@ public class UrlConnection{
         return new JSONObject();
     }
 
-    public JSONObject getPatientList(){
+    public List<String[]> getPatientList(){
         try{
             URL targetUrl = new URL(urlPatient);
             HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
@@ -144,13 +172,26 @@ public class UrlConnection{
                 JSONObject re = new JSONObject(String.valueOf(sdf));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
-                    return re.optJSONObject("data");
+                    JSONObject patients = re.optJSONObject("data");
+                    List<String[]> myDataset = new ArrayList<>();
+                    Iterator<String> it_patients = patients.keys();
+                    int i = 0;
+                    while(it_patients.hasNext()){
+                        String idnum = it_patients.next();
+                        JSONObject patient = patients.optJSONObject(idnum);
+                        myDataset.add(i,new String[]{ idnum,
+                                patient.optString("name"),
+                                patient.optString("phone"),
+                                patient.optString("birthday")});
+                        i++;
+                    }
+                    return myDataset;
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
         }
-        return new JSONObject();
+        return new ArrayList<String[]>();
     }
 
 
@@ -210,6 +251,8 @@ public class UrlConnection{
             fileInputStream.close();
             outputStream.flush();
             outputStream.close();
+
+            return true;
         }catch (Exception e){
             e.printStackTrace();
         }

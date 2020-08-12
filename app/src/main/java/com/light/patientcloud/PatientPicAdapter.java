@@ -3,11 +3,12 @@ package com.light.patientcloud;
 import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.List;
@@ -19,6 +20,9 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     private PatientPicAdapter.OnItemClickListener onItemClickListener;
+    private PatientPicAdapter.OnItemLongClickListener onItemLongClickListener;
+
+
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
@@ -30,7 +34,18 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
     }
     // Provide a suitable constructor (depends on the kind of dataset)
     public PatientPicAdapter(List<String[]> filelist) {
-        sfileList = filelist;
+        UpdateList(filelist);
+    }
+
+    public String[] GetFileintheList(int position){
+        return sfileList.get(position);
+    }
+
+    public void UpdateList(List<String[]> fileList){
+        UpdatePicList(fileList);
+    }
+    public void UpdatePicList(List<String[]> fileList) {
+        sfileList = fileList;
         sfileList.add(new String[]{"NEW","NEW"});
     }
 
@@ -50,22 +65,32 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
         //void onItemLongClick(View view, int position);
     }
 
+    public interface OnItemLongClickListener {
+        void onItemLongClick(View view, int position);
+    }
+
     public void setOnItemClickListener(PatientPicAdapter.OnItemClickListener listener) {
         this.onItemClickListener = listener;
+    }
+
+    public void setOnItemLongClickListener(PatientPicAdapter.OnItemLongClickListener listener){
+        this.onItemLongClickListener = listener;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final PatientPicAdapter.MyViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
         //String fullfilepath = Environment.getExternalStorageState() + File.separator + sfileList.get(position);
         ImageView imageView = holder.linePatient.findViewById(R.id.img_patient_pic);
+        EditText remarktext = holder.linePatient.findViewById(R.id.remark_patient_pic);
+        remarktext.setActivated(false);
         String[] imgfile = sfileList.get(position);
         if (imgfile[0].equals("NEW") && imgfile[1].equals("NEW")){
             imageView.setImageResource(R.drawable.card_new_item);
+            remarktext.setText("添加新图片");
         }else{
-            imageView.setImageURI(Uri.fromFile(new File(sfileList.get(position)[0])));
+            imageView.setImageURI(Uri.fromFile(new File(imgfile[0])));
+            remarktext.setText(imgfile[1]);
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +99,16 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
                     int pos = holder.getLayoutPosition();
                     onItemClickListener.onItemClick(holder.itemView, pos);
                 }
+            }
+        });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(onItemLongClickListener != null) {
+                    int pos = holder.getLayoutPosition();
+                    onItemLongClickListener.onItemLongClick(holder.itemView, pos);
+                }
+                return true;
             }
         });
 

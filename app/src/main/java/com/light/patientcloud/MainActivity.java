@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         editUsername.setText("test");
         editPassword.setText("qwe123");
         globalConnection = new UrlConnection();
+
         final Intent patientIndex = new Intent(this, PatientListActivity.class);
         //final Intent patientInfo = new Intent(this,PatientInfoActivity.class);
         //startActivity(patientInfo);

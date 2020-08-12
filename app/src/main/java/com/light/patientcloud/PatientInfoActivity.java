@@ -34,33 +34,39 @@ public class PatientInfoActivity extends AppCompatActivity {
     private TabLayout pagesTabs;
     final int rCode_takephoto = 2;
     private Intent takePictureIntent = null;
+    private final String[] categoryString = {"undefine","avatar","pic","eval","epos"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_info);
-        @SuppressLint("HandlerLeak")
-        Handler picHandler = new Handler(){
+
+        Handler addPicHandler = new Handler(new Handler.Callback() {
             @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what){
+            public boolean handleMessage(Message message) {
+                switch (message.what){
+                    case 2:
+                        chooseImage("pic","tmp.jpg",2);
+                        break;
                     case 3:
-                        chooseImage("pic","tmp.jpg",3);
+                        chooseImage("eval","tmp.jpg",3);
+                        break;
+                    case 4:
+                        chooseImage("epos","tmp.jpg",4);
                         break;
                 }
+                return true;
             }
-        };
+        });
 
+        currentIdnum = getIntent().getStringExtra("idnum");
+        pagesAdapter = new PatientInfoAdapter(this,currentIdnum,addPicHandler);
         pagesTabs = findViewById(R.id.tab_patient_info);
         infoPages = findViewById(R.id.page_patient_info);
-        pagesAdapter = new PatientInfoAdapter(this,picHandler);
+
         infoPages.setAdapter(pagesAdapter);
         pagesTabs.setupWithViewPager(infoPages);
 
         btnPost = findViewById(R.id.btn_post_patient);
-        currentIdnum = getIntent().getStringExtra("idnum");
-
-
-
         MainActivity.fileManager.checkChildDir(currentIdnum);
         takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         btnPost.setOnClickListener(new View.OnClickListener() {
@@ -68,30 +74,19 @@ public class PatientInfoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 pagesAdapter.postTextInfo(currentIdnum);
                 finish();
-//                switch (pagesTabs.getSelectedTabPosition()){
-//                    case 0:
-//                    case 1:
-//                        pagesAdapter.postTextInfo(currentIdnum);
-//                        finish();
-//                        break;
-//                    case 2:
-//                        chooseImage("pic","tmp.jpg",3);
-//                }
-                //startActivity();
             }
         });
 
+
         pagesAdapter.getTextInfo(currentIdnum);
-
-
-
-
         pagesAdapter.viewAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                chooseImage("avatar","tmp.jpg",rCode_takephoto);
+                chooseImage("avatar","tmp.jpg",1);
             }
         });
+
+
 
     }
 
@@ -107,23 +102,46 @@ public class PatientInfoActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        RecyclerView patientPicView = null;
         if (resultCode == RESULT_OK) {
             switch (requestCode){
-                case rCode_takephoto:
-                        pagesAdapter.viewAvatar.setImageURI(Uri.fromFile(MainActivity.fileManager.getFile(currentIdnum,"avatar","tmp.jpg")));
+                case 1:
+                    pagesAdapter.viewAvatar.setImageURI(Uri.fromFile(MainActivity.fileManager.getFile(currentIdnum,"avatar","tmp.jpg")));
+                    break;
+                case 2:
+                    patientPicView = pagesAdapter.viewSurgerypic;
                     break;
                 case 3:
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            MainActivity.globalConnection.uploadImg(currentIdnum,"pic","tmp.jpg");
-                            finish();
-                        }
-                    }).start();
+                    patientPicView = pagesAdapter.viewEvalpic;
+                    break;
+                case 4:
+                    patientPicView = pagesAdapter.viewEpospic;
                     break;
             }
+            if(requestCode > 1 && patientPicView != null)
+            {
+                final PatientPicAdapter patientPicAdapter = (PatientPicAdapter) patientPicView.getAdapter();
+                final RecyclerView tmpView = patientPicView;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(MainActivity.globalConnection.uploadImg(currentIdnum,categoryString[requestCode],"tmp.jpg")){
+                            patientPicAdapter.UpdateList(MainActivity.globalConnection.getPicList(currentIdnum,categoryString[requestCode]));
+                            tmpView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    patientPicAdapter.notifyDataSetChanged();
+                                }
+                            });
+
+                        }
+
+                    }
+                }).start();
+            }
+
 
         }
 

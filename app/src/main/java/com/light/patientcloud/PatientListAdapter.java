@@ -15,6 +15,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     private PatientListAdapter.OnItemClickListener onItemClickListener;
+    private PatientListAdapter.OnItemLongClickListener onItemLongClickListener;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
@@ -29,6 +30,9 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         mDataset = myDataset;
     }
 
+    public void UpdatePaitentList(List<String[]> myDataset){
+        mDataset = myDataset;
+    }
     // Create new views (invoked by the layout manager)
     @Override
     public PatientListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
@@ -42,11 +46,18 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
-        //void onItemLongClick(View view, int position);
+    }
+
+    public interface OnItemLongClickListener {
+        void onItemLongClick(View view, int position);
     }
 
     public void setOnItemClickListener(PatientListAdapter.OnItemClickListener listener) {
         this.onItemClickListener = listener;
+    }
+
+    public void setOnItemLongClickListener(PatientListAdapter.OnItemLongClickListener listener){
+        this.onItemLongClickListener = listener;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -59,8 +70,8 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         idnum_view.setText(someString[0]);
         TextView name_view = holder.linePatient.findViewById(R.id.name_view);
         name_view.setText(someString[1]);
-        TextView gender_view = holder.linePatient.findViewById(R.id.text_gender);
-        gender_view.setText(someString[2]);
+        TextView phone_view = holder.linePatient.findViewById(R.id.text_remark);
+        phone_view.setText(someString[2]);
         TextView birthday_view = holder.linePatient.findViewById(R.id.text_birthday);
         birthday_view.setText(someString[3]);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -70,6 +81,17 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                     int pos = holder.getLayoutPosition();
                     onItemClickListener.onItemClick(holder.itemView, pos);
                 }
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(onItemLongClickListener != null) {
+                    int pos = holder.getLayoutPosition();
+                    onItemLongClickListener.onItemLongClick(holder.itemView, pos);
+                }
+                return true;
             }
         });
 
