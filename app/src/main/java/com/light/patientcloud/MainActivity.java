@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
                                 if(r){
                                     editPassword.setBackgroundResource(R.drawable.edit_normal);
                                     startActivity(patientIndex);
-                                    finish();
                                 }
                                 else
                                 {

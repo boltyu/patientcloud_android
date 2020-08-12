@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class UrlConnection{
 
     private String sessionid;
-    private String hostaddress = "192.168.1.132";
+    private String hostaddress = "192.168.1.75";
     private String hostport = "8000";
     private String urlHost = "";
     private String urlLogin = "", urlLogout = "";
@@ -155,11 +155,10 @@ public class UrlConnection{
 
 
 
-    public Boolean uploadImg(String idnum, String category, String fullfilepath){
+    public Boolean uploadImg(String idnum, String category, String filename){
         try{
             URL targetUrl = new URL(urlPatient+idnum+"/"+category+"/");
             //hash = MessageDigest.getInstance("MD5").digest();
-            String pathToOurFile = Environment.getExternalStorageDirectory() + "/tmp.jpg";
             String lineEnd = "\r\n";
             String twoHyphens = "--";
             String boundary = "*****";
@@ -168,8 +167,7 @@ public class UrlConnection{
             byte[] buffer;
             int maxBufferSize = 1 * 1024 * 1024;
 
-            FileInputStream fileInputStream = new FileInputStream(new File(
-                    pathToOurFile));
+            FileInputStream fileInputStream = new FileInputStream(MainActivity.fileManager.getFile(idnum,category,filename));
 
             HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
 
@@ -186,7 +184,7 @@ public class UrlConnection{
             DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
             outputStream.writeBytes(twoHyphens + boundary + lineEnd);
             outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\""
-                            + pathToOurFile + "\"" + lineEnd);
+                            + "tmp.jpg" + "\"" + lineEnd);
             outputStream.writeBytes(lineEnd);
 
             bytesAvailable = fileInputStream.available();

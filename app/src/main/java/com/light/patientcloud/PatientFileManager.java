@@ -42,6 +42,7 @@ public class PatientFileManager {
         return false;
     }
 
+    // get file intent whether if exist
     public File getFile(String idnum, String category, String filename){
         String fullfilepath = rootPath + File.separator + idnum + File.separator + category + File.separator + filename;
         return new File(fullfilepath);

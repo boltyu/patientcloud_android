@@ -1,20 +1,22 @@
 package com.light.patientcloud;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -30,21 +32,17 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Calendar;
 import java.util.List;
-import java.util.zip.Inflater;
-
-import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
 public class PatientInfoAdapter extends PagerAdapter {
 
     private PatientPicAdapter picAdapter;
     private LinearLayout viewBase, viewSurgery;
-    private RecyclerView viewSurgerypic, viewEvalpic, viewEpospic;
+    public RecyclerView viewSurgerypic, viewEvalpic, viewEpospic;
     private String[] pageTitle = {"基本信息", "手术信息", "手术照片", "评估照片", "电极照片"};
     private List<View> mViewList = new ArrayList<>();
-    private TimePicker editPatient_surgerytime;
-    private DatePicker editPatient_surgerydate;
+    private EditText editPatient_surgerytime;
     private EditText editPatient_name, editPatient_birthday,
             editPatient_phone,
             editPatient_remark,
@@ -56,8 +54,9 @@ public class PatientInfoAdapter extends PagerAdapter {
     public ImageView viewAvatar;
 
     private Context pcontext = null;
-    
-    public PatientInfoAdapter(final Context context) {
+    private Handler mHandler;
+    public PatientInfoAdapter(final Context context, Handler picHandler) {
+        mHandler = picHandler;
         viewBase = (LinearLayout) View.inflate(context,R.layout.patient_info_baseinfo,null);
         viewSurgery = (LinearLayout) View.inflate(context,R.layout.patient_info_surgery,null);
         viewSurgerypic = (RecyclerView) View.inflate(context,R.layout.patient_info_surgerypic,null);
@@ -70,8 +69,42 @@ public class PatientInfoAdapter extends PagerAdapter {
         editPatient_remark = viewBase.findViewById(R.id.edit_patient_phone);
         editPatient_devicetype = viewSurgery.findViewById(R.id.edit_patient_device_type);
         editPatient_surgerytype= viewSurgery.findViewById(R.id.edit_patient_surgery_type);
+        //editPatient_surgerytime = viewSurgery.findViewById(R.id.edit_patient_surgery_time);
         editPatient_surgerytime = viewSurgery.findViewById(R.id.edit_patient_surgery_time);
-        editPatient_surgerydate = viewSurgery.findViewById(R.id.edit_patient_surgery_date);
+
+        editPatient_surgerytime.setClickable(false);
+        editPatient_surgerytime.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if( !b || view.getId() != editPatient_surgerytime.getId())
+                    return;
+                pickDatetime(context, editPatient_surgerytime.getText().toString(), false, new OnDatePicked() {
+                    @Override
+                    public void setDateText(String text) {
+                        editPatient_surgerytime.setText(text);
+                    }
+                });
+
+            }
+        });
+
+        editPatient_birthday.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if( !b || view.getId() != editPatient_birthday.getId())
+                    return;
+                pickDatetime(context, editPatient_birthday.getText().toString(), true, new OnDatePicked() {
+                    @Override
+                    public void setDateText(String text) {
+                        editPatient_birthday.setText(text);
+                    }
+                });
+            }
+        });
+
+
+
+
         editPatient_surgerypos = viewSurgery.findViewById(R.id.edit_patient_surgery_center);
 
         List<String> genderlist = new ArrayList<String>();
@@ -137,27 +170,11 @@ public class PatientInfoAdapter extends PagerAdapter {
                         "&remark=" + editPatient_phone.getText() +
                         "&devicetype=" + editPatient_devicetype.getText() +
                         "&surgerytype=" + editPatient_surgerytype.getText() +
-                        //"&surgerytime=" + editPatient_surgerytime.getText() +
-                        "&surgerycenter=" + editPatient_surgerypos.getText()+
-                        "&surgerytime=";
+                        "&surgerytime=" + editPatient_surgerytime.getText() +
+                        "&surgerycenter=" + editPatient_surgerypos.getText();
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    String datetime = String.valueOf(editPatient_surgerydate.getYear());
-                    int mm = editPatient_surgerydate.getMonth()+1;
-                    int dd = editPatient_surgerydate.getDayOfMonth();
-                    int HH = editPatient_surgerytime.getHour();
-                    int MM = editPatient_surgerytime.getMinute();
-                    if(mm < 10) datetime += "0";
-                    datetime += mm;
-                    if(dd < 10) datetime += "0";
-                    datetime += dd + " ";
-                    if(HH < 10) datetime += "0";
-                    datetime += HH + ":";
-                    if(MM < 10) datetime += "0";
-                    datetime += MM;
-                    postdata+=datetime;
-                }
                 MainActivity.globalConnection.postPatientInfo(idnum,postdata);
+                MainActivity.globalConnection.uploadImg(idnum,"avatar","tmp.jpg");
             }
         }).start();
         return false;
@@ -176,25 +193,29 @@ public class PatientInfoAdapter extends PagerAdapter {
                     final List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,"avatar");
                     final JSONObject patientObj = MainActivity.globalConnection.getPatientInfo(idnum);
                     picAdapter = new PatientPicAdapter(getImageList(idnum));
+                    picAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            if( (position+1) == picAdapter.getItemCount()){
+                                Message message = Message.obtain(mHandler,3);
+                                message.sendToTarget();
+                            }
+                        }
+                    });
+
                     final String datetime = patientObj.optString("surgerytime");
                     viewAvatar.post(new Runnable() {
                         @Override
                         public void run() {
                             if(filelist.size() > 0)
-                                viewAvatar.setImageURI(Uri.fromFile(new File(filelist.get(0)[0])));
+                                viewAvatar.setImageURI(Uri.fromFile(new File(filelist.get(filelist.size()-1)[0])));
                             editPatient_name.setText(patientObj.optString("name"));
                             editPatient_birthday.setText(patientObj.optString("birthday"));
                             spinnerGender.setSelection(patientObj.optInt("gender"));
                             editPatient_remark.setText(patientObj.optString("remark"));
                             editPatient_devicetype.setText(patientObj.optString("devicetype"));
                             editPatient_surgerytype.setText(patientObj.optString("surgerytype"));
-                            editPatient_surgerydate.updateDate(Integer.valueOf(datetime.substring(0,4)),
-                                    Integer.valueOf(datetime.substring(4,6)),
-                                    Integer.valueOf(datetime.substring(6,8)));
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                editPatient_surgerytime.setHour(Integer.valueOf(datetime.substring(9,11)));
-                                editPatient_surgerytime.setMinute(Integer.valueOf(datetime.substring(12,14)));
-                            }
+                            editPatient_surgerytime.setText(patientObj.optString("surgerytime"));
                             editPatient_surgerypos.setText(patientObj.optString("surgerycenter"));
 
 
@@ -210,5 +231,62 @@ public class PatientInfoAdapter extends PagerAdapter {
         }
         return false;
     }
+
+    public void pickDatetime(final Context context, String olddatetime, final boolean onlydate, final OnDatePicked onDatePicked){
+        final Calendar currentDate = Calendar.getInstance();
+        if(olddatetime.length() > 8){
+            int year = Integer.parseInt(olddatetime.substring(0,4));
+            int month = Integer.parseInt(olddatetime.substring(5,7))-1;
+            int dayofmonth = Integer.parseInt(olddatetime.substring(8,10));
+            int hour = 12;
+            int minute = 12;
+            if( !onlydate ){
+                hour = Integer.parseInt(olddatetime.substring(11,13));
+                minute = Integer.parseInt(olddatetime.substring(14,16));
+            }
+            currentDate.set(year,month,dayofmonth,hour,minute);
+        }
+        // AlertDialog.THEME_HOLO_LIGHT deprecated
+        new DatePickerDialog(context, AlertDialog.THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                monthOfYear+=1;
+                String newdate = "";
+                newdate = String.valueOf(year) + "-";
+                if(monthOfYear < 10)
+                    newdate += "0";
+                newdate += String.valueOf(monthOfYear) + "-";
+                if(dayOfMonth < 10)
+                    newdate += "0";
+                newdate += String.valueOf(dayOfMonth);
+                final String fnewdatetime = newdate;
+                if( !onlydate ){
+                    new TimePickerDialog(context, AlertDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hour, int minute) {
+                            String newdatetime = fnewdatetime;
+                            if( !onlydate ){
+                                newdatetime += " ";
+                                if(hour < 10)
+                                    newdatetime += "0";
+                                newdatetime += String.valueOf(hour) + ":";
+                                if(minute < 10)
+                                    newdatetime += "0";
+                                newdatetime += String.valueOf(minute);
+                            }
+                            onDatePicked.setDateText(newdatetime);
+                        }
+                    }, currentDate.get(Calendar.HOUR_OF_DAY), currentDate.get(Calendar.MINUTE), true).show();
+                }else
+                    onDatePicked.setDateText(newdate);
+            }
+        }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE)).show();
+    }
+
+    interface OnDatePicked{
+        void setDateText(String text);
+    }
+
+
 }
 

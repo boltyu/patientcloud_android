@@ -68,7 +68,7 @@ public class PatientListActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                JSONObject patients  = MainActivity.globalConnection.getPatientList();
+                JSONObject patients = MainActivity.globalConnection.getPatientList();
                 Iterator<String> it_patients = patients.keys();
                 int i = 0;
                 while(it_patients.hasNext()){

@@ -63,17 +63,19 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
         ImageView imageView = holder.linePatient.findViewById(R.id.img_patient_pic);
         String[] imgfile = sfileList.get(position);
         if (imgfile[0].equals("NEW") && imgfile[1].equals("NEW")){
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.e("test button", "new pic");
-                }
-            });
             imageView.setImageResource(R.drawable.card_new_item);
         }else{
             imageView.setImageURI(Uri.fromFile(new File(sfileList.get(position)[0])));
         }
-
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                if(onItemClickListener != null) {
+                    int pos = holder.getLayoutPosition();
+                    onItemClickListener.onItemClick(holder.itemView, pos);
+                }
+            }
+        });
 
     }
 
