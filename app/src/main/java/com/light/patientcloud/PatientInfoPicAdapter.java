@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.util.List;
 
@@ -82,7 +84,7 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
     public void onBindViewHolder(final PatientPicAdapter.MyViewHolder holder, int position) {
         //String fullfilepath = Environment.getExternalStorageState() + File.separator + sfileList.get(position);
         ImageView imageView = holder.linePatient.findViewById(R.id.img_patient_pic);
-        EditText remarktext = holder.linePatient.findViewById(R.id.remark_patient_pic);
+        TextView remarktext = holder.linePatient.findViewById(R.id.remark_patient_pic);
         remarktext.setActivated(false);
         String[] imgfile = sfileList.get(position);
         if (imgfile[0].equals("NEW") && imgfile[1].equals("NEW")){

@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_margin="20dp"
-    android:layout_gravity="fill_vertical">
+    android:layout_gravity="center"
+    android:minHeight="1000dp"
+    android:gravity="center">
 
     <ImageView
         android:id="@+id/img_patient_avatar"
@@ -24,15 +26,17 @@
         <TextView
             android:text="@string/label_patient_name"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:textSize="@dimen/patientinfo_text_size"
+            android:gravity="center_vertical"
             android:labelFor="@+id/edit_patient_name"
             android:layout_weight="1" />
 
         <EditText
             android:id="@+id/edit_patient_name"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:textSize="@dimen/patientinfo_text_size"
             android:layout_weight="2"
             android:inputType="text" />
@@ -43,10 +47,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:layout_weight="1"
             android:textSize="@dimen/patientinfo_text_size"
             android:text="性别" />
@@ -56,6 +63,7 @@
             android:spinnerMode="dropdown"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:layout_weight="2"/>
 
 
@@ -69,16 +77,17 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:layout_weight="1"
             android:textSize="@dimen/patientinfo_text_size"
             android:text="@string/label_patient_birthday" />
         <TextView
-            android:paddingLeft="20dp"
-            android:hint="生日"
+            android:hint="选择日期"
+            android:gravity="center_vertical"
             android:id="@+id/edit_patient_birthday"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="2"
             android:textSize="@dimen/patientinfo_text_size" />
     </LinearLayout>
@@ -91,15 +100,17 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:layout_weight="1"
             android:textSize="@dimen/patientinfo_text_size"
             android:text="联系方式" />
         <EditText
             android:hint="联系方式"
             android:id="@+id/edit_patient_phone"
+            android:gravity="center_vertical"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="2"
             android:textSize="@dimen/patientinfo_text_size" />
     </LinearLayout>
