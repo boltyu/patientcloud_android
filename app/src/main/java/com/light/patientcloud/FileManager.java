@@ -3,14 +3,22 @@ package com.light.patientcloud;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
-public class PatientFileManager {
+public class FileManager {
 
-    String[] childPath= {"settings", "avatar", "pic", "eval", "epos"};
+    String[] childPath= {"undefine", "avatar", "pic", "eval", "epos"};
     public String rootPath;
 
-    public PatientFileManager(String rootname){
+    public FileManager(String rootname){
         rootPath = Environment.getExternalStorageDirectory() + File.separator + rootname;
         File rootdir = new File(rootPath);
         if( !rootdir.exists() ){
@@ -42,10 +50,44 @@ public class PatientFileManager {
         return false;
     }
 
+
     // get file intent whether if exist
     public File getFile(String idnum, String category, String filename){
         String fullfilepath = rootPath + File.separator + idnum + File.separator + category + File.separator + filename;
         return new File(fullfilepath);
+    }
+
+    public String getSettings(String key){
+        String value = "";
+        File fff = new File(rootPath+File.separator+key);
+        try {
+            FileInputStream ttt = new FileInputStream(fff);
+            byte[] bbb = new byte[1024];
+            int len = ttt.read(bbb);
+            value = new String(bbb,0,len);
+            ttt.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("hoststring", value);
+        return value;
+    }
+
+    public Boolean saveSettings(String key, String value){
+        File fff = new File(rootPath+File.separator+key);
+        try {
+            FileOutputStream ttt = new FileOutputStream(fff);
+            ttt.write(value.getBytes());
+            ttt.close();
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public File getAvatar(String idnum){

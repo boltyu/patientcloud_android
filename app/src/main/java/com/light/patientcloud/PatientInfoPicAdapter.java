@@ -6,23 +6,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.List;
 
-public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.MyViewHolder> {
+public class PatientInfoPicAdapter extends RecyclerView.Adapter<PatientInfoPicAdapter.MyViewHolder> {
 
     private List<String[]> sfileList;
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    private PatientPicAdapter.OnItemClickListener onItemClickListener;
-    private PatientPicAdapter.OnItemLongClickListener onItemLongClickListener;
+    private PatientInfoPicAdapter.OnItemClickListener onItemClickListener;
+    private PatientInfoPicAdapter.OnItemLongClickListener onItemLongClickListener;
 
 
 
@@ -35,7 +32,7 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
         }
     }
     // Provide a suitable constructor (depends on the kind of dataset)
-    public PatientPicAdapter(List<String[]> filelist) {
+    public PatientInfoPicAdapter(List<String[]> filelist) {
         UpdateList(filelist);
     }
 
@@ -53,12 +50,12 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
 
     // Create new views (invoked by the layout manager)
     @Override
-    public PatientPicAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
-                                                              int viewType) {
+    public PatientInfoPicAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
+                                                                 int viewType) {
         // create a new view
         CardView v = (CardView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.patient_pic_view, parent, false);
-        PatientPicAdapter.MyViewHolder vh = new PatientPicAdapter.MyViewHolder(v);
+        PatientInfoPicAdapter.MyViewHolder vh = new PatientInfoPicAdapter.MyViewHolder(v);
         return vh;
     }
 
@@ -71,17 +68,17 @@ public class PatientPicAdapter extends RecyclerView.Adapter<PatientPicAdapter.My
         void onItemLongClick(View view, int position);
     }
 
-    public void setOnItemClickListener(PatientPicAdapter.OnItemClickListener listener) {
+    public void setOnItemClickListener(PatientInfoPicAdapter.OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
 
-    public void setOnItemLongClickListener(PatientPicAdapter.OnItemLongClickListener listener){
+    public void setOnItemLongClickListener(PatientInfoPicAdapter.OnItemLongClickListener listener){
         this.onItemLongClickListener = listener;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final PatientPicAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(final PatientInfoPicAdapter.MyViewHolder holder, int position) {
         //String fullfilepath = Environment.getExternalStorageState() + File.separator + sfileList.get(position);
         ImageView imageView = holder.linePatient.findViewById(R.id.img_patient_pic);
         TextView remarktext = holder.linePatient.findViewById(R.id.remark_patient_pic);

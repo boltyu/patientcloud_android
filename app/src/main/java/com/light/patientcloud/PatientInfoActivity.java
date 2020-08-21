@@ -1,12 +1,7 @@
 package com.light.patientcloud;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -20,8 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import java.io.File;
 
 public class PatientInfoActivity extends AppCompatActivity {
 
@@ -62,7 +55,6 @@ public class PatientInfoActivity extends AppCompatActivity {
         pagesAdapter = new PatientInfoAdapter(this,currentIdnum,addPicHandler);
         pagesTabs = findViewById(R.id.tab_patient_info);
         infoPages = findViewById(R.id.page_patient_info);
-
         infoPages.setAdapter(pagesAdapter);
         pagesTabs.setupWithViewPager(infoPages);
 
@@ -122,17 +114,17 @@ public class PatientInfoActivity extends AppCompatActivity {
             }
             if(requestCode > 1 && patientPicView != null)
             {
-                final PatientPicAdapter patientPicAdapter = (PatientPicAdapter) patientPicView.getAdapter();
+                final PatientInfoPicAdapter patientInfoPicAdapter = (PatientInfoPicAdapter) patientPicView.getAdapter();
                 final RecyclerView tmpView = patientPicView;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         if(MainActivity.globalConnection.uploadImg(currentIdnum,categoryString[requestCode],"tmp.jpg")){
-                            patientPicAdapter.UpdateList(MainActivity.globalConnection.getPicList(currentIdnum,categoryString[requestCode]));
+                            patientInfoPicAdapter.UpdateList(MainActivity.globalConnection.getPicList(currentIdnum,categoryString[requestCode]));
                             tmpView.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    patientPicAdapter.notifyDataSetChanged();
+                                    patientInfoPicAdapter.notifyDataSetChanged();
                                 }
                             });
 

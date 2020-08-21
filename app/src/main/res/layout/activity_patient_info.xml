@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_gravity="fill_vertical"
+    android:minHeight="1000dp"
     tools:context=".PatientInfoActivity">
 
     <android.support.design.widget.TabLayout
@@ -13,7 +13,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:tabIndicatorColor="@color/colorPrimary"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"/>
 
     <android.support.v4.view.ViewPager
@@ -21,7 +21,7 @@
         app:layout_constraintTop_toBottomOf="@id/tab_patient_info"
         app:layout_constraintBottom_toTopOf="@+id/btn_post_patient"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="15"
         android:scrollbars="vertical"
         android:layout_margin="20dp"
@@ -32,7 +32,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:id="@+id/btn_post_patient"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:text="保存"

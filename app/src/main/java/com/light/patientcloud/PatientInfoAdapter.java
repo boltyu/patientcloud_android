@@ -11,11 +11,11 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -36,7 +36,7 @@ import java.util.List;
 
 public class PatientInfoAdapter extends PagerAdapter {
 
-    public PatientPicAdapter picAdapter, evalpicAdapter, epospicAdapter;
+    public PatientInfoPicAdapter picAdapter, evalpicAdapter, epospicAdapter;
     private LinearLayout viewBase, viewSurgery;
     public RecyclerView viewSurgerypic, viewEvalpic, viewEpospic;
     private String[] pageTitle = {"基本信息", "手术信息", "手术照片", "评估照片", "电极照片"};
@@ -44,24 +44,29 @@ public class PatientInfoAdapter extends PagerAdapter {
     private EditText editPatient_name,
             editPatient_phone,
             editPatient_remark,
-            editPatient_devicetype,
-            editPatient_surgerytype,
             editPatient_surgerypos;
     private TextView editPatient_birthday,editPatient_surgerytime;
-    private Spinner spinnerGender;
+    private Spinner spinnerGender, editPatient_devicetype, editPatient_surgerytype;
 
     public ImageView viewAvatar;
     private String currentidnum;
     private Context pcontext = null;
     private Handler mHandler;
+
+    private List<String> surgerylist = null;
+    private List<String> devicelist = null;
+
+
     public PatientInfoAdapter(final Context context, String idnum, Handler picHandler) {
         mHandler = picHandler;
-        viewBase = (LinearLayout) View.inflate(context,R.layout.patient_info_baseinfo,null);
-        viewSurgery = (LinearLayout) View.inflate(context,R.layout.patient_info_surgery,null);
-        viewSurgerypic = (RecyclerView) View.inflate(context,R.layout.patient_info_surgerypic,null);
-        viewEvalpic = (RecyclerView) View.inflate(context,R.layout.patient_info_evalpic,null);
-        viewEpospic = (RecyclerView) View.inflate(context,R.layout.patient_info_epospic,null);
         currentidnum = idnum;
+
+        viewBase = (LinearLayout) View.inflate(context,R.layout.patient_info_page1_baseinfo,null);
+        viewSurgery = (LinearLayout) View.inflate(context,R.layout.patient_info_page2_surgeryinfo,null);
+        viewSurgerypic = (RecyclerView) View.inflate(context,R.layout.patient_info_page3_surgerypic,null);
+        viewEvalpic = (RecyclerView) View.inflate(context,R.layout.patient_info_page4_evalpic,null);
+        viewEpospic = (RecyclerView) View.inflate(context,R.layout.patient_info_page5_epospic,null);
+
         editPatient_birthday = viewBase.findViewById(R.id.edit_patient_birthday);
         editPatient_name = viewBase.findViewById(R.id.edit_patient_name);
         editPatient_phone = viewBase.findViewById(R.id.edit_patient_phone);
@@ -95,21 +100,40 @@ public class PatientInfoAdapter extends PagerAdapter {
         });
 
 
+
         editPatient_surgerypos = viewSurgery.findViewById(R.id.edit_patient_surgery_center);
 
         List<String> genderlist = new ArrayList<String>();
         genderlist.add(0,"女");
         genderlist.add(1,"男");
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                surgerylist = MainActivity.globalConnection.getOptionList("surgeryapproaches");
+                devicelist = MainActivity.globalConnection.getOptionList("devicetypes");
+                viewSurgery.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        editPatient_devicetype.setAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_spinner_item,devicelist));
+                        editPatient_surgerytype.setAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_spinner_item,surgerylist));
+                    }
+                });
+
+            }
+        }).start();
+
         spinnerGender = viewBase.findViewById(R.id.select_patient_gender);
         spinnerGender.setAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_spinner_item,genderlist));
 
-
         mViewList.add(0,viewBase);
         mViewList.add(1,viewSurgery);
-        mViewList.add(2,viewSurgerypic);
-        mViewList.add(3,viewEvalpic);
-        mViewList.add(4,viewEpospic);
+
+        if( !currentidnum.equals("None") && !currentidnum.equals("")){
+            mViewList.add(2,viewSurgerypic);
+            mViewList.add(3,viewEvalpic);
+            mViewList.add(4,viewEpospic);
+        }
 
         viewAvatar = viewBase.findViewById(R.id.img_patient_avatar);
         int  aaa  = viewBase.getWidth();
@@ -151,6 +175,7 @@ public class PatientInfoAdapter extends PagerAdapter {
     }
 
     public boolean postTextInfo(final String idnum){
+        checkEditValid();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -160,8 +185,8 @@ public class PatientInfoAdapter extends PagerAdapter {
                         "&birthday=" + editPatient_birthday.getText() +
                         "&phone=" + editPatient_phone.getText() +
                         "&remark=" + editPatient_remark.getText() +
-                        "&devicetype=" + editPatient_devicetype.getText() +
-                        "&surgerytype=" + editPatient_surgerytype.getText() +
+                        "&devicetype=" + editPatient_devicetype.getSelectedItemPosition() +
+                        "&surgerytype=" + editPatient_surgerytype.getSelectedItemPosition() +
                         "&surgerytime=" + editPatient_surgerytime.getText() +
                         "&surgerycenter=" + editPatient_surgerypos.getText();
 
@@ -172,8 +197,12 @@ public class PatientInfoAdapter extends PagerAdapter {
         return false;
     }
 
+    public Boolean checkEditValid(){
+
+        return false;
+    }
+
     public boolean getTextInfo(final String idnum){
-        //Toast.makeText(PatientInfoActivity.this,idnum, Toast.LENGTH_LONG).show();
         if(idnum==null || idnum.equals("None") || idnum.equals("")){   // new
 
         }else{                                          // http get
@@ -182,54 +211,60 @@ public class PatientInfoAdapter extends PagerAdapter {
                 public void run() {
                     final List<String[]> filelist = MainActivity.globalConnection.getPicList(idnum,"avatar");
                     final JSONObject patientObj = MainActivity.globalConnection.getPatientInfo(idnum);
-                    picAdapter = new PatientPicAdapter(getImageList(idnum,"pic"));
-                    picAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
+                    picAdapter = new PatientInfoPicAdapter(getImageList(idnum,"pic"));
+                    picAdapter.setOnItemClickListener(new PatientInfoPicAdapter.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
                             if( (position+1) == picAdapter.getItemCount()){
-                                Message message = Message.obtain(mHandler,2);
-                                message.sendToTarget();
+                                NotifyTakePhoto(2);
+                            }else{
+                                File tmpfile = new File(picAdapter.GetFileintheList(position)[0]);
+                                DialogModifyRemark("pic", tmpfile.getName(),(TextView)view.findViewById(R.id.remark_patient_pic));
                             }
                         }
                     });
-                    picAdapter.setOnItemLongClickListener(new PatientPicAdapter.OnItemLongClickListener() {
+                    picAdapter.setOnItemLongClickListener(new PatientInfoPicAdapter.OnItemLongClickListener() {
                         @Override
                         public void onItemLongClick(View view, int position) {
-                            ProcessLongClick(position,"pic",viewSurgerypic);
+                            ConfirmDeletePhoto(position,"pic",viewSurgerypic);
                         }
                     });
 
-                    evalpicAdapter = new PatientPicAdapter(getImageList(idnum,"eval"));
-                    evalpicAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
+                    evalpicAdapter = new PatientInfoPicAdapter(getImageList(idnum,"eval"));
+                    evalpicAdapter.setOnItemClickListener(new PatientInfoPicAdapter.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
                             if( (position+1) == evalpicAdapter.getItemCount()){
-                                Message message = Message.obtain(mHandler,3);
-                                message.sendToTarget();
+                                NotifyTakePhoto(3);
+                            }else{
+                                File tmpfile = new File(epospicAdapter.GetFileintheList(position)[0]);
+                                DialogModifyRemark("eval", tmpfile.getName(), (TextView)view.findViewById(R.id.remark_patient_pic));
                             }
                         }
                     });
-                    evalpicAdapter.setOnItemLongClickListener(new PatientPicAdapter.OnItemLongClickListener() {
+                    evalpicAdapter.setOnItemLongClickListener(new PatientInfoPicAdapter.OnItemLongClickListener() {
                         @Override
                         public void onItemLongClick(View view, int position) {
-                            ProcessLongClick(position,"eval",viewEvalpic);
+                            ConfirmDeletePhoto(position,"eval",viewEvalpic);
                         }
                     });
 
-                    epospicAdapter = new PatientPicAdapter(getImageList(idnum,"epos"));
-                    epospicAdapter.setOnItemClickListener(new PatientPicAdapter.OnItemClickListener() {
+                    epospicAdapter = new PatientInfoPicAdapter(getImageList(idnum,"epos"));
+                    epospicAdapter.setOnItemClickListener(new PatientInfoPicAdapter.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
                             if( (position+1) == epospicAdapter.getItemCount()){
-                                Message message = Message.obtain(mHandler,4);
-                                message.sendToTarget();
+                                NotifyTakePhoto(4);
+                            }else {
+                                File tmpfile = new File(epospicAdapter.GetFileintheList(position)[0]);
+                                DialogModifyRemark("epos", tmpfile.getName(), (TextView) view.findViewById(R.id.remark_patient_pic));
                             }
                         }
                     });
-                    epospicAdapter.setOnItemLongClickListener(new PatientPicAdapter.OnItemLongClickListener() {
+                    epospicAdapter.setOnItemLongClickListener(new PatientInfoPicAdapter.OnItemLongClickListener() {
                         @Override
                         public void onItemLongClick(View view, int position) {
-                            ProcessLongClick(position,"epos",viewEpospic);
+                            ConfirmDeletePhoto(position,"epos",viewEpospic);
                         }
                     });
 
@@ -245,8 +280,8 @@ public class PatientInfoAdapter extends PagerAdapter {
                             spinnerGender.setSelection(patientObj.optInt("gender"));
                             editPatient_remark.setText(patientObj.optString("remark"));
                             editPatient_phone.setText(patientObj.optString("phone"));
-                            editPatient_devicetype.setText(patientObj.optString("devicetype"));
-                            editPatient_surgerytype.setText(patientObj.optString("surgerytype"));
+                            editPatient_devicetype.setSelection(devicelist.indexOf(patientObj.optString("devicetype")));
+                            editPatient_surgerytype.setSelection(surgerylist.indexOf(patientObj.optString("surgerytype")));
                             editPatient_surgerytime.setText(patientObj.optString("surgerytime"));
                             editPatient_surgerypos.setText(patientObj.optString("surgerycenter"));
 
@@ -274,8 +309,51 @@ public class PatientInfoAdapter extends PagerAdapter {
         return false;
     }
 
-    public void ProcessLongClick(final int position, final String category,final RecyclerView targetView){
-        final PatientPicAdapter tmpAdapter = (PatientPicAdapter) targetView.getAdapter();
+    public void DialogModifyRemark(final String category, final String filename, final TextView targetview){
+        LinearLayout tmpview = (LinearLayout) LayoutInflater.from(pcontext).inflate(R.layout.patient_remark_view,null,false);
+        final EditText sourceview = tmpview.findViewById(R.id.edit_remark_patient_pic);
+        sourceview.setText(targetview.getText());
+        new AlertDialog.Builder(pcontext)
+                .setTitle("编辑图片备注")
+                .setView(tmpview)
+                .setPositiveButton("保存", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        final String remarkstring = sourceview.getText().toString();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(MainActivity.globalConnection.postRemark(currentidnum,category,filename,remarkstring))
+                                {
+                                    targetview.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            targetview.setText(remarkstring);
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .show();
+    }
+
+
+
+    public void NotifyTakePhoto(int ncode){
+        Message message = Message.obtain(mHandler,ncode);
+        message.sendToTarget();
+    }
+
+    public void ConfirmDeletePhoto(final int position, final String category, final RecyclerView targetView){
+        final PatientInfoPicAdapter tmpAdapter = (PatientInfoPicAdapter) targetView.getAdapter();
         final String fullfilepath = tmpAdapter.GetFileintheList(position)[0];
         final File tmpfile = new File(fullfilepath);
         final String filename = tmpfile.getName();

@@ -2,6 +2,7 @@ package com.light.patientcloud;
 
 import android.os.Environment;
 import android.provider.ContactsContract;
+import android.text.BoringLayout;
 import android.util.JsonReader;
 
 import org.json.JSONObject;
@@ -29,16 +30,22 @@ import java.util.concurrent.ExecutionException;
 public class UrlConnection{
 
     private String sessionid;
-    private String hostaddress = "192.168.1.132";
-    private String hostport = "8000";
+    private String hostaddress = "192.168.1.75:8000";
     private String urlHost = "";
     private String urlLogin = "", urlLogout = "";
     private String urlPatient = "";
-    private String urlPatient_pic_suffix = "/pic/";
-    private String urlPatient_epos_suffix = "/epos/";
 
     UrlConnection(){
-        urlHost = "http://" + hostaddress + ":" + hostport + "/";
+        initUrl(hostaddress);
+    }
+
+    public String getHostaddress(){
+        return hostaddress;
+    }
+    public void initUrl(String targetaddress){
+        hostaddress = targetaddress;
+//        hostaddress = "192.168.44.154:8000";
+        urlHost = "http://" + hostaddress + "/";
         urlLogin = urlHost + "doctor/login/";
         urlLogout = urlHost + "doctor/logout/";
         urlPatient = urlHost + "patient/";
@@ -130,6 +137,35 @@ public class UrlConnection{
         }
         return false;
     }
+
+    public Boolean postRemark(String idnum, String category, String filename, String remark){
+        try{
+            URL targetUrl = new URL(urlPatient + idnum + "/" + category + "/" + filename);
+            HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
+            privateconnection.setRequestMethod("POST");
+            privateconnection.setConnectTimeout(5000);
+            privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+            privateconnection.setRequestProperty("Cookie",sessionid);
+            String postdata = "method=remark&data=" + remark;
+            OutputStream outLogin = privateconnection.getOutputStream();
+            outLogin.write(postdata.getBytes());
+            int rcode = privateconnection.getResponseCode();
+            if(rcode == 200) {
+                InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
+                char[] sdf = new char[256];
+                inLogin.read(sdf);
+                JSONObject re = new JSONObject(String.valueOf(sdf));
+                privateconnection.disconnect();
+                if(re.optInt("result") == 200) {
+                    return true;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     public JSONObject getPatientInfo(String idnum){
         try{
@@ -320,7 +356,7 @@ public class UrlConnection{
                     int i = 0;
                     while(it_listdata.hasNext()) {
                         String filename = it_listdata.next();
-                        String remark = listdata.optString(idnum);
+                        String remark = listdata.optString(filename);
                         File tmpfile = MainActivity.fileManager.getFile(idnum,category,filename);
                         if(!tmpfile.exists()){
                             downloadImg(idnum,category,filename,tmpfile);
@@ -339,6 +375,7 @@ public class UrlConnection{
         }
         return piclist;
     }
+
 
 
     public Boolean downloadImg(String idnum, String category, String filename, File targetfile){
@@ -363,5 +400,39 @@ public class UrlConnection{
         }
 
         return false;
+    }
+
+    public List<String> getOptionList(String optionname){
+        List<String> optionlist = new ArrayList<>();
+        try {
+            URL targetUrl = new URL(urlPatient + optionname + "/");
+            HttpURLConnection privateconnection = (HttpURLConnection)targetUrl.openConnection();
+            privateconnection.setRequestMethod("GET");
+            privateconnection.setConnectTimeout(5000);
+            privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+            privateconnection.setRequestProperty("Cookie",sessionid);
+            int rcode = privateconnection.getResponseCode();
+            if(rcode == 200) {
+                InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
+                char[] sdf = new char[65536];
+                inLogin.read(sdf);
+                JSONObject re = new JSONObject(String.valueOf(sdf));
+                privateconnection.disconnect();
+                if(re.optInt("result") == 200) {
+                    JSONObject listdata = re.optJSONObject("data");
+                    Iterator<String> it_listdata = listdata.keys();
+                    while(it_listdata.hasNext()) {
+                        String idstr = it_listdata.next();
+                        optionlist.add(Integer.parseInt(idstr),listdata.optString(idstr));
+                    }
+                }
+            }
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return optionlist;
+
     }
 }
