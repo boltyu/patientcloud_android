@@ -91,21 +91,22 @@ public class PatientListActivity extends Activity {
                         }
                     });
 
+
                     mAdapter.setOnItemLongClickListener(new PatientListAdapter.OnItemLongClickListener() {
                         @Override
                         public void onItemLongClick(View view, int position) {
-                            final TextView idnumview = view.findViewById(R.id.idnum_view);
+                            final String idnumtext= mAdapter.getPatientAt(position)[0];
                             final TextView nameview = view.findViewById(R.id.name_view);
                             new AlertDialog.Builder(pcontext)
                                     .setTitle("确认删除")
-                                    .setMessage(idnumview.getText()+"  "+nameview.getText())
+                                    .setMessage(nameview.getText())
                                     .setPositiveButton("确认", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
                                             new Thread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    if(MainActivity.globalConnection.deletePaitent(idnumview.getText().toString())){
+                                                    if(MainActivity.globalConnection.deletePaitent(idnumtext)){
                                                         final List<String[]> newDataset = MainActivity.globalConnection.getPatientList();
                                                         recyclerView.post(new Runnable() {
                                                             @Override
@@ -134,8 +135,8 @@ public class PatientListActivity extends Activity {
                         @Override
                         public void onItemClick(View view, int position) {
                             CardView patientView = (CardView) recyclerView.getChildAt(position);
-                            TextView idnumView = (TextView)patientView.findViewById(R.id.idnum_view);
-                            patientInfo.putExtra("idnum",idnumView.getText());
+                            String idnumtext = mAdapter.getPatientAt(position)[0];
+                            patientInfo.putExtra("idnum",idnumtext);
                             startActivityForResult(patientInfo,1);
                         }
                     });

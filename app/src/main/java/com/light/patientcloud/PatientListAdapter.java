@@ -66,13 +66,13 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         String[] someString = mDataset.get(position);
-        TextView idnum_view = holder.linePatient.findViewById(R.id.idnum_view);
-        idnum_view.setText(someString[0]);
+//        TextView idnum_view = holder.linePatient.findViewById(R.id.idnum_view);
+//        idnum_view.setText(someString[0]);
         TextView name_view = holder.linePatient.findViewById(R.id.name_view);
         name_view.setText(someString[1]);
-        TextView phone_view = holder.linePatient.findViewById(R.id.text_remark);
-        phone_view.setText(someString[2]);
-        TextView birthday_view = holder.linePatient.findViewById(R.id.text_birthday);
+        TextView surgeryposview = holder.linePatient.findViewById(R.id.text_surgery_position);
+        surgeryposview.setText(someString[2]);
+        TextView birthday_view = holder.linePatient.findViewById(R.id.text_surgery_time);
         birthday_view.setText(someString[3]);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,6 +95,10 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             }
         });
 
+    }
+
+    public String[] getPatientAt(int position){
+        return mDataset.get(position);
     }
 
     // Return the size of your dataset (invoked by the layout manager)

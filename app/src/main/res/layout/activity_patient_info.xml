@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:minHeight="1000dp"
+    android:transcriptMode="alwaysScroll"
+    android:stackFromBottom="true"
     tools:context=".PatientInfoActivity">
 
     <android.support.design.widget.TabLayout
@@ -18,15 +19,15 @@
 
     <android.support.v4.view.ViewPager
         android:id="@+id/page_patient_info"
-        app:layout_constraintTop_toBottomOf="@id/tab_patient_info"
-        app:layout_constraintBottom_toTopOf="@+id/btn_post_patient"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
         android:layout_weight="15"
         android:scrollbars="vertical"
-        android:layout_margin="20dp"
-        >
-    </android.support.v4.view.ViewPager>
+        android:transcriptMode="alwaysScroll"
+        android:stackFromBottom="true"
+        app:layout_constraintBottom_toTopOf="@+id/btn_post_patient"
+        app:layout_constraintTop_toBottomOf="@id/tab_patient_info"/>
 
     <Button
         app:layout_constraintBottom_toBottomOf="parent"

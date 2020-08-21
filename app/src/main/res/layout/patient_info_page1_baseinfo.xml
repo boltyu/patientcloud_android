@@ -6,7 +6,9 @@
     android:orientation="vertical"
     android:layout_margin="20dp"
     android:layout_gravity="center"
-    android:minHeight="1000dp"
+    android:scrollbars="vertical"
+    android:transcriptMode="alwaysScroll"
+    android:stackFromBottom="true"
     android:gravity="center">
 
     <ImageView
@@ -37,6 +39,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
+            android:windowSoftInputMode="adjustPan"
             android:textSize="@dimen/patientinfo_text_size"
             android:layout_weight="2"
             android:inputType="text" />

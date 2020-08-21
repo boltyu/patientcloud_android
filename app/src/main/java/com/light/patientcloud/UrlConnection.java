@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 public class UrlConnection{
 
     private String sessionid;
-    private String hostaddress = "192.168.1.75:8000";
+    private String hostaddress = "122.51.67.162:8000";
     private String urlHost = "";
     private String urlLogin = "", urlLogout = "";
     private String urlPatient = "";
@@ -217,8 +217,8 @@ public class UrlConnection{
                         JSONObject patient = patients.optJSONObject(idnum);
                         myDataset.add(i,new String[]{ idnum,
                                 patient.optString("name"),
-                                patient.optString("phone"),
-                                patient.optString("birthday")});
+                                patient.optString("surgerytime"),
+                                patient.optString("surgerycenter")});
                         i++;
                     }
                     return myDataset;
