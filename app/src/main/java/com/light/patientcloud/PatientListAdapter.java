@@ -1,12 +1,16 @@
 package com.light.patientcloud;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.List;
 
 public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.MyViewHolder> {
@@ -65,9 +69,27 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        String[] someString = mDataset.get(position);
+        final String[] someString = mDataset.get(position);
 //        TextView idnum_view = holder.linePatient.findViewById(R.id.idnum_view);
 //        idnum_view.setText(someString[0]);
+        final ImageView avatar_view = holder.linePatient.findViewById(R.id.idnum_avatar_view);
+        final File tmpfile = MainActivity.fileManager.getFile(someString[0],"avatar",someString[4]);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if(!tmpfile.exists())
+                        MainActivity.globalConnection.downloadImg(someString[0],"avatar", someString[4], tmpfile);
+                    avatar_view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            avatar_view.setImageURI(Uri.fromFile(tmpfile));
+                        }
+                    });
+
+                }
+            }).start();
+
         TextView name_view = holder.linePatient.findViewById(R.id.name_view);
         name_view.setText(someString[1]);
         TextView surgeryposview = holder.linePatient.findViewById(R.id.text_surgery_position);

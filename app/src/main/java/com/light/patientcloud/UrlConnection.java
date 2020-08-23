@@ -218,7 +218,8 @@ public class UrlConnection{
                         myDataset.add(i,new String[]{ idnum,
                                 patient.optString("name"),
                                 patient.optString("surgerytime"),
-                                patient.optString("surgerycenter")});
+                                patient.optString("surgerycenter"),
+                                patient.optString("avatar")});
                         i++;
                     }
                     return myDataset;

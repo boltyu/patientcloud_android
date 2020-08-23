@@ -23,6 +23,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -37,7 +38,8 @@ import java.util.List;
 public class PatientInfoAdapter extends PagerAdapter {
 
     public PatientInfoPicAdapter picAdapter, evalpicAdapter, epospicAdapter;
-    private LinearLayout viewBase, viewSurgery;
+    private ScrollView viewBase;
+    private LinearLayout viewSurgery;
     public RecyclerView viewSurgerypic, viewEvalpic, viewEpospic;
     private String[] pageTitle = {"基本信息", "手术信息", "手术照片", "评估照片", "电极照片"};
     private List<View> mViewList = new ArrayList<>();
@@ -61,7 +63,7 @@ public class PatientInfoAdapter extends PagerAdapter {
         mHandler = picHandler;
         currentidnum = idnum;
 
-        viewBase = (LinearLayout) View.inflate(context,R.layout.patient_info_page1_baseinfo,null);
+        viewBase = (ScrollView) View.inflate(context,R.layout.patient_info_page1_baseinfo,null);
         viewSurgery = (LinearLayout) View.inflate(context,R.layout.patient_info_page2_surgeryinfo,null);
         viewSurgerypic = (RecyclerView) View.inflate(context,R.layout.patient_info_page3_surgerypic,null);
         viewEvalpic = (RecyclerView) View.inflate(context,R.layout.patient_info_page4_evalpic,null);
@@ -136,7 +138,6 @@ public class PatientInfoAdapter extends PagerAdapter {
         }
 
         viewAvatar = viewBase.findViewById(R.id.img_patient_avatar);
-        int  aaa  = viewBase.getWidth();
 
         pcontext = context;
     }
@@ -191,7 +192,7 @@ public class PatientInfoAdapter extends PagerAdapter {
                         "&surgerycenter=" + editPatient_surgerypos.getText();
 
                 MainActivity.globalConnection.postPatientInfo(idnum,postdata);
-                MainActivity.globalConnection.uploadImg(idnum,"avatar","tmp.jpg");
+                //MainActivity.globalConnection.uploadImg(idnum,"avatar","tmp.jpg");
             }
         }).start();
         return false;

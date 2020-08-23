@@ -100,7 +100,19 @@ public class PatientInfoActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode){
                 case 1:
-                    pagesAdapter.viewAvatar.setImageURI(Uri.fromFile(MainActivity.fileManager.getFile(currentIdnum,"avatar","tmp.jpg")));
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(MainActivity.globalConnection.uploadImg(currentIdnum,"avatar","tmp.jpg"))
+                                pagesAdapter.viewAvatar.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        pagesAdapter.viewAvatar.setImageURI(Uri.fromFile(MainActivity.fileManager.getFile(currentIdnum,"avatar","tmp.jpg")));
+
+                                    }
+                                });
+                        }
+                    }).start();
                     break;
                 case 2:
                     patientPicView = pagesAdapter.viewSurgerypic;
