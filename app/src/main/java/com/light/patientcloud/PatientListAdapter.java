@@ -93,9 +93,18 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         TextView name_view = holder.linePatient.findViewById(R.id.name_view);
         name_view.setText(someString[1]);
         TextView surgeryposview = holder.linePatient.findViewById(R.id.text_surgery_position);
-        surgeryposview.setText(someString[2]);
+        if(position == 0){
+            someString[3] = someString[3].concat("（手术中心）");
+        }
+        surgeryposview.setText(someString[3]);
         TextView birthday_view = holder.linePatient.findViewById(R.id.text_surgery_time);
-        birthday_view.setText(someString[3]);
+        String timestring = someString[2];
+        timestring = timestring.substring(0,16);
+        timestring = timestring.replace('T',' ');
+        if(position == 0){
+            timestring = timestring.concat("（手术时间）");
+        }
+        birthday_view.setText(timestring);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {

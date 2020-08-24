@@ -22,8 +22,7 @@
             />
         <activity
             android:name=".PatientListActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+            android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".MainActivity"
             >
             <intent-filter>
