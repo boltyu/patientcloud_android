@@ -1,5 +1,6 @@
 package com.light.patientcloud;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PatientInfoActivity extends AppCompatActivity {
 
@@ -28,12 +30,15 @@ public class PatientInfoActivity extends AppCompatActivity {
     final int rCode_takephoto = 2;
     private Intent takePictureIntent = null;
     private final String[] categoryString = {"undefine","avatar","pic","eval","epos"};
+    private Context global_context;
+    Handler addPicHandler, statusHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_info);
-
-        Handler addPicHandler = new Handler(new Handler.Callback() {
+        global_context = this;
+        addPicHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message message) {
                 switch (message.what){
@@ -51,8 +56,32 @@ public class PatientInfoActivity extends AppCompatActivity {
             }
         });
 
+        statusHandler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
+                switch (message.what){
+                    case 1:
+                        Toast.makeText(global_context,"正在获取患者信息",Toast.LENGTH_SHORT).show();
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        Toast.makeText(global_context,"图片上传中，请不要返回",Toast.LENGTH_LONG).show();
+                        break;
+                    case 4:
+                        Toast.makeText(global_context,"图片上传成功",Toast.LENGTH_SHORT).show();
+                        break;
+
+                }
+                return true;
+            }
+        });
+
+
+
+
         currentIdnum = getIntent().getStringExtra("idnum");
-        pagesAdapter = new PatientInfoAdapter(this,currentIdnum,addPicHandler);
+        pagesAdapter = new PatientInfoAdapter(this,currentIdnum,addPicHandler,statusHandler);
         pagesTabs = findViewById(R.id.tab_patient_info);
         infoPages = findViewById(R.id.page_patient_info);
         infoPages.setAdapter(pagesAdapter);
@@ -68,18 +97,18 @@ public class PatientInfoActivity extends AppCompatActivity {
                 finish();
             }
         });
+        setTitle(currentIdnum.equals("None")?"新建患者":currentIdnum);
+        if(currentIdnum==null || currentIdnum.equals("None") || currentIdnum.equals(""))
+        {
 
-
-        pagesAdapter.getTextInfo(currentIdnum);
+        }else
+            pagesAdapter.fillBaseInfo(currentIdnum);
         pagesAdapter.viewAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 chooseImage("avatar","tmp.jpg",1);
             }
         });
-
-
-
     }
 
     public void chooseImage(String category, String filename, int code){ // filename collision
@@ -131,6 +160,8 @@ public class PatientInfoActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        Message startmessage = Message.obtain(statusHandler,3);
+                        startmessage.sendToTarget();
                         if(MainActivity.globalConnection.uploadImg(currentIdnum,categoryString[requestCode],"tmp.jpg")){
                             patientInfoPicAdapter.UpdateList(MainActivity.globalConnection.getPicList(currentIdnum,categoryString[requestCode]));
                             tmpView.post(new Runnable() {
@@ -139,6 +170,8 @@ public class PatientInfoActivity extends AppCompatActivity {
                                     patientInfoPicAdapter.notifyDataSetChanged();
                                 }
                             });
+                            Message endmessage = Message.obtain(statusHandler,4);
+                            endmessage.sendToTarget();
 
                         }
 

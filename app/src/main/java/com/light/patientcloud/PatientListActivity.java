@@ -1,36 +1,62 @@
 package com.light.patientcloud;
 
-import android.app.Activity;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-public class PatientListActivity extends Activity {
+public class PatientListActivity extends AppCompatActivity {
 
     public RecyclerView recyclerView;
     public PatientListAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
-    private Button btnNewPatient;
-    private TextView textWelcome, textLogout;
     Intent patientInfo = null;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.patientlist_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_add:
+                if(patientInfo == null)
+                    return false;
+                patientInfo.putExtra("idnum","None");
+                startActivityForResult(patientInfo,1);
+                break;
+            case R.id.action_logout:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(MainActivity.globalConnection.loginUser("n", "n", 1)){
+                            finish();
+                        }
+                    }
+                }).start();
+                break;
+
+        }
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,32 +67,8 @@ public class PatientListActivity extends Activity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator( new DefaultItemAnimator());
-        btnNewPatient = findViewById(R.id.btn_new_patient);
         patientInfo = new Intent(this, PatientInfoActivity.class);
-        btnNewPatient.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                patientInfo.putExtra("idnum","None");
-                startActivityForResult(patientInfo,1);
-            }
-        });
-        textWelcome = findViewById(R.id.text_doctor_welcome);
-        textWelcome.setText(textWelcome.getText());
 
-        textLogout = findViewById(R.id.text_doctor_logout);
-        textLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if(MainActivity.globalConnection.loginUser("n", "n", 1)){
-                        finish();
-                    }
-                }
-            }).start();
-            }
-        });
         UpdatePatientList(true);
     }
 
@@ -88,6 +90,7 @@ public class PatientListActivity extends Activity {
                         @Override
                         public void run() {
                             recyclerView.setAdapter(mAdapter);
+                            setTitle("患者列表   "+ myDataset.size()+"项");
                         }
                     });
 
@@ -113,6 +116,7 @@ public class PatientListActivity extends Activity {
                                                             public void run() {
                                                                 mAdapter.UpdatePaitentList(newDataset);
                                                                 mAdapter.notifyDataSetChanged();
+                                                                setTitle("患者列表   "+ myDataset.size()+"项");
                                                             }
                                                         });
                                                     }
@@ -145,12 +149,13 @@ public class PatientListActivity extends Activity {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            final List<String[]> newDataset = MainActivity.globalConnection.getPatientList();
+                            //final List<String[]> newDataset = MainActivity.globalConnection.getPatientList();
                             recyclerView.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mAdapter.UpdatePaitentList(newDataset);
+                                    mAdapter.UpdatePaitentList(myDataset);
                                     mAdapter.notifyDataSetChanged();
+                                    setTitle("患者列表   "+ myDataset.size()+"项");
                                 }
                             });
                         }

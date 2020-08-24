@@ -5,32 +5,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:orientation="vertical"
-        android:paddingLeft="100dp"
-        android:paddingRight="100dp"
+        android:layout_margin="80dp"
         >
+
         <EditText
+            android:drawableStart="@android:drawable/sym_action_email"
             android:id="@+id/edit_username"
             android:inputType="text"
+            android:textAlignment="textEnd"
             android:hint="@string/login_username_hint"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="50dp"/>
         <EditText
+            android:drawableStart="@android:drawable/ic_lock_lock"
             android:id="@+id/edit_password"
+            android:textAlignment="textEnd"
             android:hint="@string/login_password_hint"
             android:inputType="textPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="50dp" />
 
         <Button
+            android:layout_margin="30dp"
             android:id="@+id/btn_login"
+            android:textColor="#ffffff"
             android:text="@string/button_login"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="50dp"
+            android:background="@drawable/button_normal"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

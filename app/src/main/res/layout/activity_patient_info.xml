@@ -15,25 +15,27 @@
         app:tabIndicatorColor="@color/colorPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
+
         />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/page_patient_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="8"
         android:layout_margin="20dp"
         android:scrollbars="vertical"
         android:transcriptMode="alwaysScroll"
-        android:stackFromBottom="true"
-        app:layout_constraintBottom_toTopOf="@+id/btn_post_patient"
-        app:layout_constraintTop_toBottomOf="@id/tab_patient_info"/>
+        android:stackFromBottom="true"/>
+
 
     <Button
-
         app:layout_constraintBottom_toBottomOf="parent"
         android:id="@+id/btn_post_patient"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:layout_margin="5dp"
         android:text="保存"
         android:textSize="20sp"

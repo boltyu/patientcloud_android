@@ -1,35 +1,24 @@
 package com.light.patientcloud;
 
-import android.os.Environment;
-import android.provider.ContactsContract;
-import android.text.BoringLayout;
-import android.util.JsonReader;
-
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.nio.Buffer;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class UrlConnection{
 
-    private String sessionid;
+    private String sessionstr;
     private String hostaddress = "122.51.67.162:8000";
     private String urlHost = "";
     private String urlLogin = "", urlLogout = "";
@@ -61,7 +50,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("POST");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             privateconnection.setDoOutput(true);
             OutputStream outLogin = privateconnection.getOutputStream();
             outLogin.write(postdata.getBytes());
@@ -89,7 +78,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("POST");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             String postdata = "method=delete&idnum="+idnum;
             OutputStream outLogin = privateconnection.getOutputStream();
             outLogin.write(postdata.getBytes());
@@ -117,7 +106,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("POST");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             String postdata = "method=delete";
             OutputStream outLogin = privateconnection.getOutputStream();
             outLogin.write(postdata.getBytes());
@@ -145,7 +134,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("POST");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             String postdata = "method=remark&data=" + remark;
             OutputStream outLogin = privateconnection.getOutputStream();
             outLogin.write(postdata.getBytes());
@@ -174,7 +163,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("GET");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
@@ -199,7 +188,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("GET");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
@@ -255,7 +244,7 @@ public class UrlConnection{
 
             connection.setRequestMethod("POST");
 
-            connection.setRequestProperty("Cookie",sessionid);
+            connection.setRequestProperty("Cookie", sessionstr);
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
 
@@ -323,7 +312,8 @@ public class UrlConnection{
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     String cookieVal = privateconnection.getHeaderField("Set-Cookie");
-                    sessionid = cookieVal.substring(0, cookieVal.indexOf(";"));
+                    sessionstr = cookieVal.substring(0, cookieVal.indexOf(";"));
+                    MainActivity.fileManager.saveSettings("seesionstr",sessionstr);
                     return true;
                 }
             }else{
@@ -343,7 +333,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("GET");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
@@ -383,7 +373,7 @@ public class UrlConnection{
         try {
             URL targetUrl = new URL(urlPatient + idnum + "/" + category + "/" + filename);
             HttpURLConnection privateconnection = (HttpURLConnection) targetUrl.openConnection();
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             privateconnection.setDoInput(true);
             privateconnection.connect();
             OutputStream outputStream = new FileOutputStream(targetfile);
@@ -411,7 +401,7 @@ public class UrlConnection{
             privateconnection.setRequestMethod("GET");
             privateconnection.setConnectTimeout(5000);
             privateconnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            privateconnection.setRequestProperty("Cookie",sessionid);
+            privateconnection.setRequestProperty("Cookie", sessionstr);
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());

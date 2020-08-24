@@ -9,20 +9,24 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:orientation="vertical"
         >
         <EditText
             android:id="@+id/edit_username"
+            android:drawableLeft="@android:drawable/ic_menu_my_calendar"
             android:inputType="text"
+            android:textAlignment="textEnd"
             android:hint="@string/login_username_hint"
-            android:layout_width="400dp"
-            android:layout_height="80dp" />
+            android:layout_width="match_parent"
+            android:layout_height="80dp"/>
         <EditText
             android:id="@+id/edit_password"
+            android:drawableLeft="@android:drawable/ic_lock_idle_lock"
+            android:textAlignment="textEnd"
             android:hint="@string/login_password_hint"
             android:inputType="textPassword"
-            android:layout_width="400dp"
+            android:layout_width="match_parent"
             android:layout_height="80dp" />
 
         <Button

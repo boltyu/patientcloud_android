@@ -1,9 +1,12 @@
 package com.light.patientcloud;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 2);
         fileManager = new FileManager("patientcloud");
 
         setContentView(R.layout.activity_main);
@@ -40,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
         if( !hostaddress.equals("") ){
             globalConnection.initUrl(hostaddress);
         }
+
+
+
         pcontext=this;
         final Intent patientIndex = new Intent(this, PatientListActivity.class);
         //final Intent patientInfo = new Intent(this,PatientInfoActivity.class);
@@ -93,6 +99,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        int resultCode = 0;
+        switch (requestCode) {
+            case 2: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 3);
+                } else {
+                    resultCode = requestCode;
+                }
+                break;
+            }
+            case 3: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    
+                } else {
+                    resultCode = requestCode;
+                }
+                break;
+            }
+        }
+        if (resultCode > 0) {
+            AlertDialog.Builder msgbuilder = new AlertDialog.Builder(this);
+            msgbuilder.setTitle("请求关键权限\r\n\n");
+            String msgtext = "相机使用权限:\r\n\n调用相机拍摄照片"+
+                    "内存读写权限:\r\n\n保存录像及语音数据"+
+                    "位置信息权限:\r\n\n使用WIFI需要获取位置权限\r\n\nhttps://developer.android.com/guide/topics/connectivity/wifi-scan";
+            msgbuilder.setMessage(msgtext);
+            msgbuilder.setPositiveButton("退出", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    System.exit(0);// User clicked OK button
+                }
+            });
+            AlertDialog msgbox = msgbuilder.create();
+            msgbox.show();
+        }
     }
 
 
