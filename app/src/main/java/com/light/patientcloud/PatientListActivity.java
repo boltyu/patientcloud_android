@@ -27,6 +27,122 @@ public class PatientListActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     Intent patientInfo = null;
 
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_patient_list);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_patient_list);
+        // use a linear layout manage
+        layoutManager = new LinearLayoutManager(this);
+
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator( new DefaultItemAnimator());
+        patientInfo = new Intent(this, PatientInfoActivity.class);
+
+        InitPaitentList();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (resultCode)
+        {
+            case 1:
+                UpdatePatientList();
+                break;
+        }
+    }
+
+    private void InitPaitentList(){
+        final Context pcontext = this;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final List<String[]> myDataset = MainActivity.globalConnection.getPatientList();
+                mAdapter = new PatientListAdapter(myDataset);
+                mAdapter.setOnItemLongClickListener(new PatientListAdapter.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        final String idnumtext= mAdapter.getPatientAt(position)[0];
+                        final TextView nameview = view.findViewById(R.id.name_view);
+                        new AlertDialog.Builder(pcontext)
+                                .setTitle("确认删除")
+                                .setMessage(nameview.getText())
+                                .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if(MainActivity.globalConnection.deletePaitent(idnumtext)){
+                                                    final List<String[]> newDataset = MainActivity.globalConnection.getPatientList();
+                                                    recyclerView.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            mAdapter.UpdatePaitentList(newDataset);
+                                                            mAdapter.notifyDataSetChanged();
+                                                            setTitle("患者列表   "+ myDataset.size()+"项");
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }).start();
+
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                    }
+                                })
+                                .show();
+                    }
+                });
+
+                mAdapter.setOnItemClickListener(new PatientListAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        //CardView patientView = (CardView) recyclerView.getChildAt(position);
+                        String idnumtext = mAdapter.getPatientAt(position)[0];
+                        patientInfo.putExtra("idnum",idnumtext);
+                        startActivityForResult(patientInfo,1);
+                    }
+                });
+
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.setAdapter(mAdapter);
+                        setTitle("患者列表   "+ myDataset.size()+"项");
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    private void UpdatePatientList(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final List<String[]> myDataset = MainActivity.globalConnection.getPatientList();
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.UpdatePaitentList(myDataset);
+                        mAdapter.notifyDataSetChanged();
+                        setTitle("患者列表   " + myDataset.size() + "项");
+                    }
+                });
+            }
+        }).start();
+    }
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -57,118 +173,6 @@ public class PatientListActivity extends AppCompatActivity {
         }
         return true;
     }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_patient_list);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_patient_list);
-        // use a linear layout manage
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator( new DefaultItemAnimator());
-        patientInfo = new Intent(this, PatientInfoActivity.class);
-
-        UpdatePatientList(true);
-    }
-
-    @Override
-    protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        UpdatePatientList(false);
-    }
-
-    private void UpdatePatientList(final boolean firsttime){
-        final Context pcontext = this;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final List<String[]> myDataset = MainActivity.globalConnection.getPatientList();
-                if(firsttime){
-                    mAdapter = new PatientListAdapter(myDataset);
-                    recyclerView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            recyclerView.setAdapter(mAdapter);
-                            setTitle("患者列表   "+ myDataset.size()+"项");
-                        }
-                    });
-
-
-                    mAdapter.setOnItemLongClickListener(new PatientListAdapter.OnItemLongClickListener() {
-                        @Override
-                        public void onItemLongClick(View view, int position) {
-                            final String idnumtext= mAdapter.getPatientAt(position)[0];
-                            final TextView nameview = view.findViewById(R.id.name_view);
-                            new AlertDialog.Builder(pcontext)
-                                    .setTitle("确认删除")
-                                    .setMessage(nameview.getText())
-                                    .setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            new Thread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    if(MainActivity.globalConnection.deletePaitent(idnumtext)){
-                                                        final List<String[]> newDataset = MainActivity.globalConnection.getPatientList();
-                                                        recyclerView.post(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-                                                                mAdapter.UpdatePaitentList(newDataset);
-                                                                mAdapter.notifyDataSetChanged();
-                                                                setTitle("患者列表   "+ myDataset.size()+"项");
-                                                            }
-                                                        });
-                                                    }
-                                                }
-                                            }).start();
-
-                                        }
-                                    })
-                                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                                        }
-                                    })
-                                    .show();
-                        }
-                    });
-
-                    mAdapter.setOnItemClickListener(new PatientListAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(View view, int position) {
-                            CardView patientView = (CardView) recyclerView.getChildAt(position);
-                            String idnumtext = mAdapter.getPatientAt(position)[0];
-                            patientInfo.putExtra("idnum",idnumtext);
-                            startActivityForResult(patientInfo,1);
-                        }
-                    });
-
-                }else{
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //final List<String[]> newDataset = MainActivity.globalConnection.getPatientList();
-                            recyclerView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mAdapter.UpdatePaitentList(myDataset);
-                                    mAdapter.notifyDataSetChanged();
-                                    setTitle("患者列表   "+ myDataset.size()+"项");
-                                }
-                            });
-                        }
-                    }).start();
-
-                }
-            }
-        }).start();
-    }
-
-
-
-
 
 
 }

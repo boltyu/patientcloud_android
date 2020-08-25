@@ -14,14 +14,12 @@
         >
         <ImageView
             android:id="@+id/img_patient_pic"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="5"
-            android:layout_margin="10dp"
-            />
+            android:layout_weight="5"/>
 
         <TextView
-            android:hint="点击图片编辑备注"
+            android:hint="点击图片编辑描述"
             android:layout_margin="5dp"
             android:id="@+id/remark_patient_pic"
             android:layout_width="match_parent"

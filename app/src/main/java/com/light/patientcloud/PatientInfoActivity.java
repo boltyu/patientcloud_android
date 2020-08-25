@@ -2,6 +2,7 @@ package com.light.patientcloud;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +14,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -88,13 +92,15 @@ public class PatientInfoActivity extends AppCompatActivity {
         pagesTabs.setupWithViewPager(infoPages);
 
         btnPost = findViewById(R.id.btn_post_patient);
-        MainActivity.fileManager.checkChildDir(currentIdnum);
+
         takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pagesAdapter.postTextInfo(currentIdnum);
-                finish();
+                if(pagesAdapter.postTextInfo(currentIdnum)) {
+                    setResult(1);
+                    finish();
+                }
             }
         });
         setTitle(currentIdnum.equals("None")?"新建患者":currentIdnum);
@@ -184,5 +190,28 @@ public class PatientInfoActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        setResult(0);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.patientinfo_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_backtolist:
+                setResult(0);
+                finish();
+                break;
+        }
+        return true;
+    }
 }
 

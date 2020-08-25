@@ -1,5 +1,8 @@
 package com.light.patientcloud;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
@@ -192,7 +195,7 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[4096];
+                char[] sdf = new char[1000000];
                 inLogin.read(sdf);
                 JSONObject re = new JSONObject(String.valueOf(sdf));
                 privateconnection.disconnect();
@@ -367,6 +370,33 @@ public class UrlConnection{
         return piclist;
     }
 
+    public String getUpdateUrl(){
+        return urlHost + "apk/update/";
+//        try {
+//            File targetfile = MainActivity.fileManager.getUpdateFile();
+//            URL targetUrl = new URL(urlHost + "apk/update/");
+//            HttpURLConnection privateconnection = (HttpURLConnection) targetUrl.openConnection();
+//            privateconnection.setRequestProperty("Cookie", sessionstr);
+//            privateconnection.setDoInput(true);
+//            privateconnection.connect();
+//            OutputStream outputStream = new FileOutputStream(targetfile);
+//            InputStream inputStream = privateconnection.getInputStream();
+//            int aaa = inputStream.available();
+//            byte [] buffer = new byte[1024];
+//            int len = 0, total = 0;
+//            while( ( len = inputStream.read(buffer)) != -1){
+//                outputStream.write(buffer,0,len);
+//                total += len;
+//            }
+//            outputStream.close();
+//            privateconnection.disconnect();
+//            return true;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+    }
+
 
 
     public Boolean downloadImg(String idnum, String category, String filename, File targetfile){
@@ -386,6 +416,7 @@ public class UrlConnection{
             }
             outputStream.close();
             privateconnection.disconnect();
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -75,6 +75,18 @@ public class FileManager {
         return value;
     }
 
+    public File getUpdateFile(){
+        File fff = new File(rootPath+File.separator+"base.apk");
+        try {
+            if(!fff.exists()){
+                fff.createNewFile();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return fff;
+    }
+
     public Boolean saveSettings(String key, String value){
         File fff = new File(rootPath+File.separator+key);
         try {

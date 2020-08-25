@@ -2,18 +2,25 @@ package com.light.patientcloud;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
         if( !hostaddress.equals("") ){
             globalConnection.initUrl(hostaddress);
         }
-
-
 
         pcontext=this;
         final Intent patientIndex = new Intent(this, PatientListActivity.class);
@@ -77,9 +82,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        editUsername.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainactivity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_update_software:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(MainActivity.globalConnection.getUpdateUrl()));
+                        if (intent.resolveActivity(pcontext.getPackageManager()) != null) {
+                            final ComponentName componentName = intent.resolveActivity(pcontext.getPackageManager());
+                            pcontext.startActivity(Intent.createChooser(intent, "请选择浏览器"));
+                        } else {
+                            Toast.makeText(pcontext.getApplicationContext(), "请下载浏览器", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).start();
+                break;
+            case R.id.action_config_software:
                 LinearLayout tmpview = (LinearLayout) LayoutInflater.from(pcontext).inflate(R.layout.patient_remark_view,null,false);
                 final EditText sourceview = tmpview.findViewById(R.id.edit_remark_patient_pic);
                 sourceview.setText(globalConnection.getHostaddress());
@@ -95,11 +127,14 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                         .show();
-                return true;
-            }
-        });
-
+                break;
+        }
+        return true;
     }
+
+
+
+
 
 
     @Override
@@ -118,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
             case 3: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    
+
                 } else {
                     resultCode = requestCode;
                 }
@@ -129,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder msgbuilder = new AlertDialog.Builder(this);
             msgbuilder.setTitle("请求关键权限\r\n\n");
             String msgtext = "相机使用权限:\r\n\n调用相机拍摄照片"+
-                    "内存读写权限:\r\n\n保存录像及语音数据"+
+                    "内存读写权限:\r\n\n保存照片"+
                     "位置信息权限:\r\n\n使用WIFI需要获取位置权限\r\n\nhttps://developer.android.com/guide/topics/connectivity/wifi-scan";
             msgbuilder.setMessage(msgtext);
             msgbuilder.setPositiveButton("退出", new DialogInterface.OnClickListener() {

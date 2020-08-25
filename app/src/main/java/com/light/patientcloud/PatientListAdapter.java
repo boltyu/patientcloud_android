@@ -1,6 +1,9 @@
 package com.light.patientcloud;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Picture;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +13,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.MyViewHolder> {
@@ -72,39 +80,34 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         final String[] someString = mDataset.get(position);
 //        TextView idnum_view = holder.linePatient.findViewById(R.id.idnum_view);
 //        idnum_view.setText(someString[0]);
+        MainActivity.fileManager.checkChildDir(someString[0]);
         final ImageView avatar_view = holder.linePatient.findViewById(R.id.idnum_avatar_view);
         final File tmpfile = MainActivity.fileManager.getFile(someString[0],"avatar",someString[4]);
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if(!tmpfile.exists())
-                        MainActivity.globalConnection.downloadImg(someString[0],"avatar", someString[4], tmpfile);
-                    avatar_view.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            avatar_view.setImageURI(Uri.fromFile(tmpfile));
-                        }
-                    });
-
-                }
-            }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(!tmpfile.exists())
+                    MainActivity.globalConnection.downloadImg(someString[0],"avatar", someString[4], tmpfile);
+                avatar_view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        avatar_view.setImageURI(Uri.fromFile(tmpfile));
+                    }
+                });
+                avatar_view.postInvalidate();
+            }
+        }).start();
 
         TextView name_view = holder.linePatient.findViewById(R.id.name_view);
         name_view.setText(someString[1]);
-        TextView surgeryposview = holder.linePatient.findViewById(R.id.text_surgery_position);
-        if(position == 0){
-            someString[3] = someString[3].concat("（手术中心）");
-        }
-        surgeryposview.setText(someString[3]);
-        TextView birthday_view = holder.linePatient.findViewById(R.id.text_surgery_time);
         String timestring = someString[2];
         timestring = timestring.substring(0,16);
         timestring = timestring.replace('T',' ');
-        if(position == 0){
-            timestring = timestring.concat("（手术时间）");
-        }
-        birthday_view.setText(timestring);
+        TextView time_view = holder.linePatient.findViewById(R.id.text_surgery_time);
+        TextView pos_view = holder.linePatient.findViewById(R.id.text_surgery_position);
+        time_view.setText(timestring);
+        pos_view.setText(someString[3]);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
