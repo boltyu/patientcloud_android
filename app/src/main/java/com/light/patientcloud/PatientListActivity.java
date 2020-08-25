@@ -38,7 +38,7 @@ public class PatientListActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
 
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator( new DefaultItemAnimator());
+        //recyclerView.setItemAnimator( new DefaultItemAnimator());
         patientInfo = new Intent(this, PatientInfoActivity.class);
 
         InitPaitentList();
@@ -105,7 +105,6 @@ public class PatientListActivity extends AppCompatActivity {
                 mAdapter.setOnItemClickListener(new PatientListAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        //CardView patientView = (CardView) recyclerView.getChildAt(position);
                         String idnumtext = mAdapter.getPatientAt(position)[0];
                         patientInfo.putExtra("idnum",idnumtext);
                         startActivityForResult(patientInfo,1);
@@ -115,8 +114,10 @@ public class PatientListActivity extends AppCompatActivity {
                 recyclerView.post(new Runnable() {
                     @Override
                     public void run() {
-                        recyclerView.setAdapter(mAdapter);
                         setTitle("患者列表   "+ myDataset.size()+"项");
+                        mAdapter.setHasStableIds(true);
+                        recyclerView.setAdapter(mAdapter);
+
                     }
                 });
             }

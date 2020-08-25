@@ -171,7 +171,10 @@ public class UrlConnection{
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
                 char[] sdf = new char[65536];
-                inLogin.read(sdf);
+                int len = 0, total = 0;
+                while( ( len = inLogin.read(sdf,len,4096)) != -1){
+                    total += len;
+                }
                 JSONObject re = new JSONObject(String.valueOf(sdf));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
@@ -195,8 +198,11 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[1000000];
-                inLogin.read(sdf);
+                char[] sdf = new char[65536];
+                int len = 0, total = 0;
+                while( ( len = inLogin.read(sdf,len,4096)) != -1){
+                    total += len;
+                }
                 JSONObject re = new JSONObject(String.valueOf(sdf));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {

@@ -28,14 +28,23 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     // you provide access to all the views for a data item in a view holder
     private PatientListAdapter.OnItemClickListener onItemClickListener;
     private PatientListAdapter.OnItemLongClickListener onItemLongClickListener;
-
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public CardView linePatient;
+        public ImageView avatar_view;
+        public TextView name_view,time_view,pos_view;
         public MyViewHolder(CardView v) {
             super(v);
             linePatient = v;
+            avatar_view = linePatient.findViewById(R.id.idnum_avatar_view);
+            time_view  = linePatient.findViewById(R.id.text_surgery_time);
+            pos_view  = linePatient.findViewById(R.id.text_surgery_position);
+            name_view  = linePatient.findViewById(R.id.name_view);
+
         }
+
+
+
     }
     // Provide a suitable constructor (depends on the kind of dataset)
     public PatientListAdapter(List<String[]> myDataset) {
@@ -52,8 +61,15 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         // create a new view
         CardView v = (CardView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.patient_list_lineview, parent, false);
+
         MyViewHolder vh = new MyViewHolder(v);
+
         return vh;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     public interface OnItemClickListener {
@@ -78,36 +94,36 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final String[] someString = mDataset.get(position);
-//        TextView idnum_view = holder.linePatient.findViewById(R.id.idnum_view);
-//        idnum_view.setText(someString[0]);
         MainActivity.fileManager.checkChildDir(someString[0]);
-        final ImageView avatar_view = holder.linePatient.findViewById(R.id.idnum_avatar_view);
         final File tmpfile = MainActivity.fileManager.getFile(someString[0],"avatar",someString[4]);
-
         new Thread(new Runnable() {
             @Override
             public void run() {
                 if(!tmpfile.exists())
                     MainActivity.globalConnection.downloadImg(someString[0],"avatar", someString[4], tmpfile);
-                avatar_view.post(new Runnable() {
+                holder.avatar_view.post(new Runnable() {
                     @Override
                     public void run() {
-                        avatar_view.setImageURI(Uri.fromFile(tmpfile));
+                        // 这个沙雕bitmap
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = false;
+                        options.inPreferredConfig = Bitmap.Config.RGB_565;
+                        options.inSampleSize = 1;
+                        Bitmap bbb = BitmapFactory.decodeFile(tmpfile.getAbsolutePath(),options);
+                        holder.avatar_view.setImageBitmap(bbb);
                     }
                 });
-                avatar_view.postInvalidate();
             }
         }).start();
 
-        TextView name_view = holder.linePatient.findViewById(R.id.name_view);
-        name_view.setText(someString[1]);
+
+
+        holder.name_view.setText(someString[1]);
         String timestring = someString[2];
         timestring = timestring.substring(0,16);
         timestring = timestring.replace('T',' ');
-        TextView time_view = holder.linePatient.findViewById(R.id.text_surgery_time);
-        TextView pos_view = holder.linePatient.findViewById(R.id.text_surgery_position);
-        time_view.setText(timestring);
-        pos_view.setText(someString[3]);
+        holder.time_view.setText(timestring);
+        holder.pos_view.setText(someString[3]);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -129,7 +145,11 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             }
         });
 
+
+
     }
+
+
 
     public String[] getPatientAt(int position){
         return mDataset.get(position);
