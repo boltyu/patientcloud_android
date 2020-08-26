@@ -60,9 +60,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[1024];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     return 0;
@@ -88,9 +91,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[256];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     return true;
@@ -116,9 +122,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[256];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     return true;
@@ -144,9 +153,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[256];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     return true;
@@ -170,12 +182,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[65536];
-                int len = 0, total = 0;
-                while( ( len = inLogin.read(sdf,len,4096)) != -1){
-                    total += len;
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
                 }
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     return re.optJSONObject("data");
@@ -198,12 +210,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[65536];
-                int len = 0, total = 0;
-                while( ( len = inLogin.read(sdf,len,4096)) != -1){
-                    total += len;
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
                 }
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     JSONObject patients = re.optJSONObject("data");
@@ -280,9 +292,6 @@ public class UrlConnection{
             outputStream.writeBytes(twoHyphens + boundary + twoHyphens
                     + lineEnd);
 
-            int serverResponseCode = connection.getResponseCode();
-            String serverResponseMessage = connection.getResponseMessage();
-
             fileInputStream.close();
             outputStream.flush();
             outputStream.close();
@@ -315,9 +324,12 @@ public class UrlConnection{
                 if(iflogout == 1)
                     return true;
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[128];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total+1024];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     String cookieVal = privateconnection.getHeaderField("Set-Cookie");
@@ -346,9 +358,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[65536];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     JSONObject listdata = re.optJSONObject("data");
@@ -378,29 +393,6 @@ public class UrlConnection{
 
     public String getUpdateUrl(){
         return urlHost + "apk/update/";
-//        try {
-//            File targetfile = MainActivity.fileManager.getUpdateFile();
-//            URL targetUrl = new URL(urlHost + "apk/update/");
-//            HttpURLConnection privateconnection = (HttpURLConnection) targetUrl.openConnection();
-//            privateconnection.setRequestProperty("Cookie", sessionstr);
-//            privateconnection.setDoInput(true);
-//            privateconnection.connect();
-//            OutputStream outputStream = new FileOutputStream(targetfile);
-//            InputStream inputStream = privateconnection.getInputStream();
-//            int aaa = inputStream.available();
-//            byte [] buffer = new byte[1024];
-//            int len = 0, total = 0;
-//            while( ( len = inputStream.read(buffer)) != -1){
-//                outputStream.write(buffer,0,len);
-//                total += len;
-//            }
-//            outputStream.close();
-//            privateconnection.disconnect();
-//            return true;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return false;
     }
 
 
@@ -442,9 +434,12 @@ public class UrlConnection{
             int rcode = privateconnection.getResponseCode();
             if(rcode == 200) {
                 InputStreamReader inLogin = new InputStreamReader(privateconnection.getInputStream());
-                char[] sdf = new char[65536];
-                inLogin.read(sdf);
-                JSONObject re = new JSONObject(String.valueOf(sdf));
+                int len = 0, total = privateconnection.getContentLength();
+                char[] recvdata = new char[total];
+                while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
+
+                }
+                JSONObject re = new JSONObject(String.valueOf(recvdata));
                 privateconnection.disconnect();
                 if(re.optInt("result") == 200) {
                     JSONObject listdata = re.optJSONObject("data");

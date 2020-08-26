@@ -10,8 +10,6 @@
     tools:context=".PatientListActivity">
 
     <android.support.v7.widget.RecyclerView
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
         android:id="@+id/recycler_patient_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

@@ -1,5 +1,7 @@
 package com.light.patientcloud;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
@@ -91,7 +93,12 @@ public class PatientInfoPicAdapter extends RecyclerView.Adapter<PatientInfoPicAd
             imageView.setImageResource(R.drawable.card_new_item);
             remarktext.setText("添加新图片");
         }else{
-            imageView.setImageURI(Uri.fromFile(new File(imgfile[0])));
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+            options.inSampleSize = 1;
+            Bitmap bbb = BitmapFactory.decodeFile(new File(imgfile[0]).getAbsolutePath(),options);
+            imageView.setImageBitmap(bbb);
             remarktext.setText(imgfile[1]);
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {

@@ -5,6 +5,8 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -284,8 +286,14 @@ public class PatientInfoAdapter extends PagerAdapter {
                 viewAvatar.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(avatarfile.exists())
-                            viewAvatar.setImageURI(Uri.fromFile(avatarfile));
+                        if(avatarfile.exists()){
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            options.inJustDecodeBounds = false;
+                            options.inPreferredConfig = Bitmap.Config.RGB_565;
+                            options.inSampleSize = 1;
+                            Bitmap bbb = BitmapFactory.decodeFile(avatarfile.getAbsolutePath(),options);
+                            viewAvatar.setImageBitmap(bbb);
+                        }
                         editPatient_name.setText(patientObj.optString("name"));
                         editPatient_birthday.setText(patientObj.optString("birthday"));
                         spinnerGender.setSelection(patientObj.optInt("gender"));

@@ -8,11 +8,7 @@
         app:showAsAction="ifRoom"/>
     <item android:id="@+id/action_filter"
         android:icon="@android:drawable/ic_menu_agenda"
-        android:title="分类筛选"/>
-    <item android:id="@+id/action_search"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="搜索"
-        app:actionViewClass="android.widget.SearchView"/>
+        android:title="筛选"/>
     <item android:id="@+id/action_logout"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:title="退出"/>

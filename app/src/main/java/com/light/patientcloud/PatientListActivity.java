@@ -24,10 +24,7 @@ public class PatientListActivity extends AppCompatActivity {
 
     public RecyclerView recyclerView;
     public PatientListAdapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
     Intent patientInfo = null;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +32,7 @@ public class PatientListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_patient_list);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_patient_list);
         // use a linear layout manage
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 
         recyclerView.setLayoutManager(layoutManager);
         //recyclerView.setItemAnimator( new DefaultItemAnimator());
