@@ -251,7 +251,7 @@ public class PatientInfoAdapter extends PagerAdapter {
                         if( (position+1) == evalpicAdapter.getItemCount()){
                             NotifyTakePhoto(3);
                         }else{
-                            File tmpfile = new File(epospicAdapter.GetFileintheList(position)[0]);
+                            File tmpfile = new File(evalpicAdapter.GetFileintheList(position)[0]);
                             DialogModifyRemark("eval", tmpfile.getName(), (TextView)view.findViewById(R.id.remark_patient_pic));
                         }
                     }
