@@ -2,19 +2,25 @@ package com.light.patientcloud;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -241,9 +247,45 @@ public class UrlConnection{
         return new ArrayList<String[]>();
     }
 
+    public static String bytesToHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        if (src == null || src.length <= 0) {
+            return null;
+        }
+        for (int i = 0; i < src.length; i++) {
+            int v = src[i] & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+                stringBuilder.append(0);
+            }
+            stringBuilder.append(hv);
+        }
+        return stringBuilder.toString();
+    }
 
+    public static String getFileMD5(File file) {
+        if (!file.isFile()) {
+            return null;
+        }
+        MessageDigest digest = null;
+        FileInputStream in = null;
+        byte buffer[] = new byte[1024];
+        int len;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+            in = new FileInputStream(file);
+            while ((len = in.read(buffer, 0, 1024)) != -1) {
+                digest.update(buffer, 0, len);
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return bytesToHexString(digest.digest());
+    }
 
-    public Boolean uploadImg(String idnum, String category, String filename){
+    public String uploadImg(String idnum, String category, String filename){
         try{
             URL targetUrl = new URL(urlPatient+idnum+"/"+category+"/");
             //hash = MessageDigest.getInstance("MD5").digest();
@@ -253,9 +295,22 @@ public class UrlConnection{
 
             int bytesRead, bytesAvailable, bufferSize;
             byte[] buffer;
-            int maxBufferSize = 1 * 1024 * 1024;
+            int maxBufferSize = 1024 * 1024;
 
-            FileInputStream fileInputStream = new FileInputStream(MainActivity.fileManager.getFile(idnum,category,filename));
+            File sourceFile = MainActivity.fileManager.getFile(idnum,category,filename);
+            Bitmap sourceBitmap = BitmapFactory.decodeFile(sourceFile.getAbsolutePath());
+
+            File targetFile = MainActivity.fileManager.getFile(idnum,category,"tmpmd5.jpg");
+            if(!targetFile.exists())
+                targetFile.createNewFile();
+            FileOutputStream targetFileoutputstream = new FileOutputStream(targetFile);
+
+            sourceBitmap.compress(Bitmap.CompressFormat.JPEG,50,targetFileoutputstream);
+            String newfilename = getFileMD5(targetFile) + ".jpg";
+            File newtargetFile = MainActivity.fileManager.getFile(idnum,category,newfilename);
+            targetFile.renameTo(newtargetFile);
+            Log.d("filename",newfilename);
+            FileInputStream fileInputStream = new FileInputStream(newtargetFile);
 
             HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
 
@@ -295,13 +350,23 @@ public class UrlConnection{
             fileInputStream.close();
             outputStream.flush();
             outputStream.close();
+            InputStreamReader inLogin = new InputStreamReader(connection.getInputStream());
+            int len = 0, total = connection.getContentLength();
+            char[] recvdata = new char[total+1024];
+            while( ( len = inLogin.read(recvdata, len, total-len)) != -1){
 
-            return true;
+            }
+            JSONObject re = new JSONObject(String.valueOf(recvdata));
+            connection.disconnect();
+            if(re.optInt("result") == 200)
+                if(newfilename.equals(re.optString("md5")))
+                    return newfilename;
+
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        return false;
+        return "BAD";
     }
 
     public Boolean loginUser(String username, String password, int iflogout){

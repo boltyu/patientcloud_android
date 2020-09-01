@@ -138,11 +138,12 @@ public class PatientInfoActivity extends AppCompatActivity {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            if(MainActivity.globalConnection.uploadImg(currentIdnum,"avatar","tmp.jpg"))
+                            final String filename = MainActivity.globalConnection.uploadImg(currentIdnum,"avatar","tmp.jpg");
+                            if(!filename.equals("BAD"))
                                 pagesAdapter.viewAvatar.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        pagesAdapter.viewAvatar.setImageURI(Uri.fromFile(MainActivity.fileManager.getFile(currentIdnum,"avatar","tmp.jpg")));
+                                        pagesAdapter.viewAvatar.setImageURI(Uri.fromFile(MainActivity.fileManager.getFile(currentIdnum, "avatar", filename)));
 
                                     }
                                 });
@@ -168,7 +169,8 @@ public class PatientInfoActivity extends AppCompatActivity {
                     public void run() {
                         Message startmessage = Message.obtain(statusHandler,3);
                         startmessage.sendToTarget();
-                        if(MainActivity.globalConnection.uploadImg(currentIdnum,categoryString[requestCode],"tmp.jpg")){
+                        String filename = MainActivity.globalConnection.uploadImg(currentIdnum,categoryString[requestCode],"tmp.jpg");
+                        if(!filename.equals("BAD")){
                             patientInfoPicAdapter.UpdateList(MainActivity.globalConnection.getPicList(currentIdnum,categoryString[requestCode]));
                             tmpView.post(new Runnable() {
                                 @Override
