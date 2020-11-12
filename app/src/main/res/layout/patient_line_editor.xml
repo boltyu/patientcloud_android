@@ -8,7 +8,7 @@
     <EditText
         android:hint="编辑备注"
         android:layout_margin="30dp"
-        android:id="@+id/edit_remark_patient_pic"
+        android:id="@+id/line_editor_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minLines="3"

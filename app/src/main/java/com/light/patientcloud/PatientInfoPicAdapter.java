@@ -2,10 +2,6 @@ package com.light.patientcloud;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -59,7 +55,7 @@ public class PatientInfoPicAdapter extends RecyclerView.Adapter<PatientInfoPicAd
                                                                  int viewType) {
         // create a new view
         CardView v = (CardView) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.patient_pic_view, parent, false);
+                .inflate(R.layout.patient_info_pic_view, parent, false);
         PatientInfoPicAdapter.MyViewHolder vh = new PatientInfoPicAdapter.MyViewHolder(v);
         return vh;
     }

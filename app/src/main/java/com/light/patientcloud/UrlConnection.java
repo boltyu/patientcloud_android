@@ -2,6 +2,7 @@ package com.light.patientcloud;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONObject;
@@ -17,8 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.URI;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -297,19 +300,23 @@ public class UrlConnection{
             byte[] buffer;
             int maxBufferSize = 1024 * 1024;
 
-            File sourceFile = MainActivity.fileManager.getFile(idnum,category,filename);
+            File sourceFile;
+            if(filename.equals("tmp.jpg"))
+                sourceFile = MainActivity.fileManager.getFile(idnum,category,filename);
+            else
+                sourceFile = new File(filename);
             Bitmap sourceBitmap = BitmapFactory.decodeFile(sourceFile.getAbsolutePath());
 
             File targetFile = MainActivity.fileManager.getFile(idnum,category,"tmpmd5.jpg");
             if(!targetFile.exists())
                 targetFile.createNewFile();
+
             FileOutputStream targetFileoutputstream = new FileOutputStream(targetFile);
 
             sourceBitmap.compress(Bitmap.CompressFormat.JPEG,50,targetFileoutputstream);
             String newfilename = getFileMD5(targetFile) + ".jpg";
             File newtargetFile = MainActivity.fileManager.getFile(idnum,category,newfilename);
             targetFile.renameTo(newtargetFile);
-            Log.d("filename",newfilename);
             FileInputStream fileInputStream = new FileInputStream(newtargetFile);
 
             HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();

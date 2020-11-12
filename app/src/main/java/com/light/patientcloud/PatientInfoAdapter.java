@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -329,8 +328,8 @@ public class PatientInfoAdapter extends PagerAdapter {
     }
 
     public void DialogModifyRemark(final String category, final String filename, final TextView targetview){
-        LinearLayout tmpview = (LinearLayout) LayoutInflater.from(pcontext).inflate(R.layout.patient_remark_view,null,false);
-        final EditText sourceview = tmpview.findViewById(R.id.edit_remark_patient_pic);
+        LinearLayout tmpview = (LinearLayout) LayoutInflater.from(pcontext).inflate(R.layout.patient_line_editor,null,false);
+        final EditText sourceview = tmpview.findViewById(R.id.line_editor_edittext);
         sourceview.setText(targetview.getText());
         new AlertDialog.Builder(pcontext)
                 .setTitle("编辑图片备注")

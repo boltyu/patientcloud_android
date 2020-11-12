@@ -19,11 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import java.io.File;
-import java.io.FileInputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -112,8 +108,8 @@ public class MainActivity extends AppCompatActivity {
                 }).start();
                 break;
             case R.id.action_config_software:
-                LinearLayout tmpview = (LinearLayout) LayoutInflater.from(pcontext).inflate(R.layout.patient_remark_view,null,false);
-                final EditText sourceview = tmpview.findViewById(R.id.edit_remark_patient_pic);
+                LinearLayout tmpview = (LinearLayout) LayoutInflater.from(pcontext).inflate(R.layout.patient_line_editor,null,false);
+                final EditText sourceview = tmpview.findViewById(R.id.line_editor_edittext);
                 sourceview.setText(globalConnection.getHostaddress());
                 new AlertDialog.Builder(pcontext)
                         .setTitle("编辑服务器地址")
